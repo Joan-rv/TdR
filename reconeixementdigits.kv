@@ -1,0 +1,71 @@
+#:kivy 1.9.0
+MenuPantalla:
+
+<MenuPantalla>:
+    BoxLayout:
+        orientation: "vertical"
+        Button:
+            text: "Entrenar intel·ligència"
+            on_press:
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'entrenar'
+        Button:
+            text: "Provar intel·ligència"
+            on_press: 
+                root.manager.transition.direction = 'left'
+                root.manager.current = 'provar'
+        Button:
+            text: "Proporcionar dades"
+
+<EntrenarPantalla>:
+    BoxLayout:
+        orientation: "vertical"
+        Button:
+            size_hint: 0.1, 0.1
+            text: "Enrere"
+            on_press:
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'menu'
+        BoxLayout:
+            orientation: "horizontal"
+            Label:
+                text: root.informacio
+            Button:
+                text: root.text_boto
+                on_press: root.processa_entrenar()
+
+<ProvarPantalla>:
+    BoxLayout:
+        orientation: "vertical"
+        Button:
+            size_hint: 0.1, 0.1
+            text: "Enrere"
+            on_press:
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'menu'
+        RelativeLayout:
+            size_hint: None, None
+            size: "280dp", "280dp"
+            pos_hint: { "center_x": 0.5 }
+            Pintar:
+                id: canvas_pintar
+                canvas.before:
+                    Color:
+                        rgba: 1, 1, 1, 1
+                    Rectangle:
+                        size: self.size
+        BoxLayout:
+            orientation: "horizontal"
+            spacing: "20dp"
+            Button:
+                size_hint: .2, 1
+                text: "Borrar"
+                on_press: canvas_pintar.canvas.clear()
+            Button:
+                size_hint: .2, 1
+                text: "Fer predicció"
+                on_press: root.prediccio()
+
+<BoxLayout>:
+    spacing: "5dp"
+    padding: "5dp"
