@@ -2,6 +2,7 @@ import IA as ia
 import threading
 import time
 import numpy as np
+import pickle
 import kivy
 from kivy.app import App
 from kivy.uix.relativelayout import RelativeLayout
@@ -39,13 +40,12 @@ class EntrenarPantalla(Screen):
             self.thread_entrenar.start()
     
     def entrenar(self):
-        global w1, b1, w2, b2
+        global w1, b1, w2, b2, iter
         with self.informacio_candau:
             self.informacio = "Llegint dades"
         entrenament_digits, entrenament_imatges, prova_imatges = ia.llegir_dades()
         precisió = 0
         alfa = 0.15
-        iter = 0
         while self.entrenant.is_set():
             iter += 1
 
@@ -62,7 +62,15 @@ class EntrenarPantalla(Screen):
             with self.informacio_candau:
                 self.informacio = f"Iteració: {iter}, precisió: {precisió*100:.2f}%"
 
-
+    def guardar_progres(self):
+        global w1, b1, w2, b2, iter
+        with open("algorisme.pkl", 'wb') as fitxer:
+            pickle.dump((w1, b1, w2, b2, iter), fitxer)
+    
+    def recuperar_progres(self):
+        global w1, b1, w2, b2, iter
+        with open("algorisme.pkl", 'rb') as fitxer:
+            w1, b1, w2, b2, iter = pickle.load(fitxer)
 
     pass
 
@@ -73,21 +81,21 @@ class ProvarPantalla(Screen):
         #textura = self.ids.canvas_pintar.texture
         tamany=textura.size
         canvas=textura.pixels
-        dibuix = Image.frombytes(mode='RGBA', size=tamany, data=canvas)
-        dibuix = dibuix.resize((28,28))
-        dibuix = ImageOps.grayscale(dibuix)
-        dibuix = ImageOps.invert(dibuix)
-        imatge = np.frombuffer(dibuix.tobytes(), dtype=np.uint8).reshape(784, 1)
-        imatge = (imatge-np.min(imatge))/(np.max(imatge)-np.min(imatge))
+        imatge = Image.frombytes(mode='RGBA', size=tamany, data=canvas)
+        imatge = imatge.resize((28,28))
+        imatge = imatge.convert('L')
+        imatge = ImageOps.invert(imatge)
+        imatge = np.array(imatge).reshape(784, 1)
+        #imatge = np.frombuffer(imatge.tobytes(), dtype=np.uint8).reshape(784, 1)
+        imatge = imatge / 255.0
 
         #entrenament_digits, entrenament_imatges, prova_imatges = ia.llegir_dades()
         #print(entrenament_imatges.shape)
-        print(imatge.shape)
 
         _, _, _, a2 = ia.propaga(w1, b1, w2, b2, imatge)
-        ia.imprimeix_imatge(imatge.T[0])
-        print(a2)
+        #ia.imprimeix_imatge(imatge.T[0])
         print(str(np.argmax(a2, 0)))
+        print(str(np.max(a2, 0)))
 
 
 
@@ -132,4 +140,5 @@ class ReconeixementDigitsApp(App):
 
 if __name__ == '__main__':
     w1, w2, b1, b2 = ia.valors_inicials()
+    iter = 0
     ReconeixementDigitsApp().run()

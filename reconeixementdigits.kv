@@ -30,9 +30,20 @@ MenuPantalla:
             orientation: "horizontal"
             Label:
                 text: root.informacio
-            Button:
-                text: root.text_boto
-                on_press: root.processa_entrenar()
+            BoxLayout:
+                orientation: "vertical"
+                Button:
+                    size_hint: 1, 2
+                    text: root.text_boto
+                    on_press: root.processa_entrenar()
+                BoxLayout:
+                    orientation: "horizontal"
+                    Button:
+                        text: "Guardar progrés"
+                        on_press: root.guardar_progres()
+                    Button:
+                        text: "Recuperar progrés"
+                        on_press: root.recuperar_progres()
 
 <ProvarPantalla>:
     BoxLayout:
