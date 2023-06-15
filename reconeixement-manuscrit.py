@@ -40,39 +40,34 @@ class EntrenarPantalla(Screen):
             self.thread_entrenar.start()
     
     def entrenar(self):
-        global w1, b1, w2, b2, w3, b3, iter
+        global W_l, b_l, iter
         with self.informacio_candau:
             self.informacio = "Llegint dades"
         entrenament_digits, entrenament_imatges, prova_imatges = ia.llegir_dades()
         precisió = 0
-        alfa = 0.3
+        alfa = 0.1
         while self.entrenant.is_set():
             iter += 1
 
-            z1, a1, z2, a2, z3, a3 = ia.propaga(w1, b1, w2, b2, w3, b3, entrenament_imatges)
-            dw1, db1, dw2, db2, dw3, db3 = ia.retropropaga(z1, a1, z2, a2, z3, a3, w2, w3, entrenament_digits, entrenament_imatges)
+            Z_l, A_l = ia.propaga(W_l, b_l, entrenament_imatges)
+            dW_l, db_l = ia.retropropaga(Z_l, A_l, W_l, b_l, entrenament_digits, entrenament_imatges)
 
-            w1 -= alfa * dw1
-            b1 -= alfa * np.reshape(db1, (128,1))
-            w2 -= alfa * dw2
-            b2 -= alfa * np.reshape(db2, (64, 1))
-            w3 -= alfa * dw3
-            b3 -= alfa * np.reshape(db3, (10, 1))
+            W_l, b_l = ia.actualitza_paràmetres(W_l, b_l, dW_l, db_l, alfa)
 
-            precisió = np.sum(np.argmax(a3, 0) == entrenament_digits)/entrenament_digits.size
+            precisió = np.sum(np.argmax(A_l[-1], 0) == entrenament_digits)/entrenament_digits.size
 
             with self.informacio_candau:
                 self.informacio = f"Iteració: {iter}, precisió: {precisió*100:.2f}%"
 
     def guardar_progres(self):
-        global w1, b1, w2, b2, w3, b3, iter
-        with open("algorisme.pkl", 'wb') as fitxer:
-            pickle.dump((w1, b1, w2, b2, w3, b3, iter), fitxer)
+        global W_l, b_l, iter, estructura
+        with open(f"algorisme{estructura}.pkl", 'wb') as fitxer:
+            pickle.dump((W_l, b_l, iter), fitxer)
     
     def recuperar_progres(self):
-        global w1, b1, w2, b2, w3, b3, iter
-        with open("algorisme.pkl", 'rb') as fitxer:
-            w1, b1, w2, b2, w3, b3, iter = pickle.load(fitxer)
+        global W_l, b_l, iter, estructura
+        with open(f"algorisme{estructura}.pkl", 'rb') as fitxer:
+            W_l, b_l, iter = pickle.load(fitxer)
 
     pass
 
@@ -80,7 +75,7 @@ class ProvarPantalla(Screen):
     prediccio = StringProperty("Realitza una predicció")
 
     def predieix(self):
-        global w1, b1, w2, b2, w3, b3
+        global W_l, b_l
         textura = self.ids.canvas_pintar.export_as_image().texture
         #textura = self.ids.canvas_pintar.texture
         tamany=textura.size
@@ -96,11 +91,11 @@ class ProvarPantalla(Screen):
         #entrenament_digits, entrenament_imatges, prova_imatges = ia.llegir_dades()
         #print(entrenament_imatges.shape)
 
-        _, _, _, _, _, a3 = ia.propaga(w1, b1, w2, b2, w3, b3, imatge)
+        _, A_l = ia.propaga(W_l, b_l, imatge)
         #ia.imprimeix_imatge(imatge.T[0])
-        self.prediccio = f"Predicció: {np.argmax(a3, 0)[0]} | Seguretat: {np.max(a3, 0)[0]*100:.2f}%"
-        print(str(np.argmax(a3, 0)))
-        print(str(np.max(a3, 0)))
+        self.prediccio = f"Predicció: {np.argmax(A_l[-1], 0)[0]} | Confiança: {np.max(A_l[-1], 0)[0]*100:.2f}%"
+        print(str(np.argmax(A_l[-1], 0)))
+        print(str(np.max(A_l[-1], 0)))
 
 
 
@@ -144,6 +139,7 @@ class ReconeixementDigitsApp(App):
         return sm
 
 if __name__ == '__main__':
-    w1, w2, w3, b1, b2, b3 = ia.valors_inicials()
+    estructura = [784, 256, 128, 64, 10]
+    W_l, b_l = ia.valors_inicials(estructura)
     iter = 0
     ReconeixementDigitsApp().run()

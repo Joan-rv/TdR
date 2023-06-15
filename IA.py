@@ -5,7 +5,6 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
-
 # Funcions útils
 
 def imprimeix_imatge(image):
@@ -45,23 +44,29 @@ def llegir_dades():
 
 # Inicialtizar valors i definir funcions
 
-def valors_inicials():
-    w1 = np.random.randn(128, 28*28)
-    w2 = np.random.randn(64, 128)
-    w3 = np.random.randn(10, 64)
-    b1 = np.random.randn(128, 1)
-    b2 = np.random.randn(64, 1)
-    b3 = np.random.randn(10, 1)
-    return w1, w2, w3, b1, b2, b3
+def valors_inicials(dimesnisons):
+    W_l = []
+    b_l = []
+    for i in range(len(dimesnisons)-1):
+        W_l.append(np.random.randn(dimesnisons[i+1], dimesnisons[i]))
+    for dimenió in dimesnisons[1:]:
+        b_l.append(np.random.randn(dimenió, 1))
 
-def propaga(w1, b1, w2, b2, w3, b3, imatges):
-    z1 = w1.dot(imatges) + b1
-    a1 = sigmoide(z1)
-    z2 = w2.dot(a1) + b2
-    a2 = sigmoide(z2)
-    z3 = w3.dot(a2) + b3
-    a3 = softmax(z3)
-    return z1, a1, z2, a2, z3, a3
+    return W_l, b_l
+
+def propaga(W_l, b_l, imatges):
+    Z_l = []
+    A_l = []
+    # valor inicial depén de imatges i no de A_l
+    Z_l.append(W_l[0].dot(imatges) + b_l[0])
+
+    for i in range(1, len(W_l)):
+        A_l.append(sigmoide(Z_l[i-1]))
+        Z_l.append(W_l[i].dot(A_l[i - 1]) + b_l[i])
+    
+    A_l.append(softmax(Z_l[-1]))
+
+    return Z_l, A_l
 
 def one_hot(digits):
     one_hot_digits = np.zeros((digits.shape[0], 10))
@@ -69,41 +74,45 @@ def one_hot(digits):
         one_hot_vec[digit] = 1
     return one_hot_digits.T
 
-def retropropaga(z1, a1, z2, a2, z3, a3, w2, w3, digits, imatges):
+def retropropaga(Z_l, A_l, W_l, b_l, digits, imatges):
     tamany, m = imatges.shape
-    dz3 = 2*(a3 - one_hot(digits))
-    dw3 = 1/m * (dz3.dot(a2.T))
-    db3 = 1/m * (np.sum(dz3, 1))
-    dz2 = w3.T.dot(dz3)*d_sigmoide(z2)
-    dw2 = 1/m * (dz2.dot(a1.T))
-    db2 = 1/m * np.sum(dz2,1)
-    dz1 = w2.T.dot(dz2)*d_sigmoide(z1)
-    dw1 = 1/m * (dz1.dot(imatges.T))
-    db1 = 1/m * np.sum(dz1, 1)
+    delta_l = [None] * len(W_l)
+    dW_l = [None] * len(W_l)
+    db_l = [None] * len(b_l)
 
-    return dw1, db1, dw2, db2, dw3, db3
+    delta_l[-1] = 2*(A_l[-1] - one_hot(digits))
+
+    for i in range(len(W_l) - 1, 0, -1): # desde (len(W_l) -1) (inclusiu) fins 0 (exclusiu)
+        dW_l[i] = 1/m * (delta_l[i].dot(A_l[i - 1].T))
+        db_l[i] = 1/m * (np.sum(delta_l[i], 1))
+
+        delta_l[i - 1] = W_l[i].T.dot(delta_l[i]) * d_sigmoide(Z_l[i - 1])
+    
+    dW_l[0] = 1/m * (delta_l[0].dot(imatges.T))
+    db_l[0] = 1/m * (np.sum(delta_l[0], 1))
+
+    return dW_l, db_l
+
+def actualitza_paràmetres(W_l, b_l, dW_l, db_l, alfa):
+    W_l = [ W - dW * alfa for (W, dW) in zip(W_l, dW_l) ]
+    b_l = [ b - np.reshape(db, b.shape) * alfa for (b, db) in zip(b_l, db_l) ]
+
+    return W_l, b_l
 
 if __name__ == '__main__':
     entrenament_digits, entrenament_imatges, prova_imatges = llegir_dades()
-    w1, w2, w3, b1, b2, b3 = valors_inicials()
-    imprimeix_imatge(entrenament_imatges.T[0])
-    print(entrenament_digits[0])
     precisió = 0
     alfa = 0.15
     iter = 0
+    W_l, b_l = valors_inicials([784, 16, 10])
     while alfa < 0.9:
         iter += 1
 
-        z1, a1, z2, a2, z3, a3 = propaga(w1, b1, w2, b2, w3, b3, entrenament_imatges)
-        dw1, db1, dw2, db2, dw3, db3 = retropropaga(z1, a1, z2, a2, z3, a3, w2, w3, entrenament_digits, entrenament_imatges)
+        Z_l, A_l = propaga(W_l, b_l, entrenament_imatges)
+        dW_l, db_l = retropropaga(Z_l, A_l, W_l, b_l, entrenament_digits, entrenament_imatges)
 
-        w1 -= alfa * dw1
-        b1 -= alfa * np.reshape(db1, (128,1))
-        w2 -= alfa * dw2
-        b2 -= alfa * np.reshape(db2, (16, 1))
-        w3 -= alfa * dw3
-        b3 -= alfa * np.reshape(db3, (10, 1))
+        W_l, b_l = actualitza_paràmetres(W_l, b_l, dW_l, db_l, alfa)
 
-        precisió = np.sum(np.argmax(a3, 0) == entrenament_digits)/entrenament_digits.size
-
-        print(f"Iteració: {iter}, precisió: {precisió*100:.2f}%", end="\r")
+        precisió = np.sum(np.argmax(A_l[-1], 0) == entrenament_digits)/entrenament_digits.size
+        if (iter % 10 == 0):
+            print(f"Iteració: {iter}, precisió: {precisió*100:.2f}%", end="\r")
