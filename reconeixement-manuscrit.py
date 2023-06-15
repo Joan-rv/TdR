@@ -77,7 +77,9 @@ class EntrenarPantalla(Screen):
     pass
 
 class ProvarPantalla(Screen):
-    def prediccio(self):
+    prediccio = StringProperty("Realitza una predicció")
+
+    def predieix(self):
         global w1, b1, w2, b2, w3, b3
         textura = self.ids.canvas_pintar.export_as_image().texture
         #textura = self.ids.canvas_pintar.texture
@@ -96,6 +98,7 @@ class ProvarPantalla(Screen):
 
         _, _, _, _, _, a3 = ia.propaga(w1, b1, w2, b2, w3, b3, imatge)
         #ia.imprimeix_imatge(imatge.T[0])
+        self.prediccio = f"Predicció: {np.argmax(a3, 0)[0]} | Seguretat: {np.max(a3, 0)[0]*100:.2f}%"
         print(str(np.argmax(a3, 0)))
         print(str(np.max(a3, 0)))
 
