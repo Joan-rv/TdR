@@ -20,7 +20,7 @@ def softmax(x):
     exp = np.exp(x - np.max(x))
     return exp / exp.sum(axis=0)
 
-# derivada de relu
+# derivada de sigmoide
 def d_sigmoide(x):
     return sigmoide(x) * (1-sigmoide(x))
 
