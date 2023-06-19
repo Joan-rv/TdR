@@ -75,7 +75,7 @@ def one_hot(digits):
     return one_hot_digits.T
 
 def retropropaga(Z_l, A_l, W_l, b_l, digits, imatges):
-    tamany, m = imatges.shape
+    n, m = imatges.shape
     delta_l = [None] * len(W_l)
     dW_l = [None] * len(W_l)
     db_l = [None] * len(b_l)
