@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 
 def imprimeix_imatge(image):
     pixels = image.reshape((28, 28))
-    plt.imshow(pixels, cmap='Greys')
+    plt.imshow(pixels, cmap='Greys_r')
     plt.axis('off')
     plt.show()
 
@@ -32,12 +32,17 @@ def processa_imatges(imatges):
 # LLegir dades i processar-les
 
 def llegir_dades():
+    # Llegir CSV i guardar en variables
     entrenament = pd.read_csv("train.csv").to_numpy()
     prova = pd.read_csv("test.csv").to_numpy()
+    
+    # Ordre aleatori
     np.random.shuffle(entrenament)
 
 
+    # Obtenir primera columna
     entrenament_digits = entrenament[:, 0]
+    # Obtenir les imatges i processar-les per facilitar les operacions
     entrenament_imatges = processa_imatges(entrenament[:, 1:])
     prova_imatges = processa_imatges(prova)
     return entrenament_digits, entrenament_imatges, prova_imatges
@@ -101,6 +106,7 @@ def actualitza_paràmetres(W_l, b_l, dW_l, db_l, alfa):
 
 if __name__ == '__main__':
     entrenament_digits, entrenament_imatges, prova_imatges = llegir_dades()
+    imprimeix_imatge(entrenament_imatges.T[0])
     precisió = 0
     alfa = 0.15
     iter = 0
