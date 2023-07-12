@@ -1,4 +1,4 @@
-import ia
+import IA as ia
 import threading
 import time
 import numpy as np
@@ -66,8 +66,11 @@ class EntrenarPantalla(Screen):
     
     def recuperar_progres(self):
         global W_l, b_l, iter, estructura
-        with open(f"algorisme{estructura}.pkl", 'rb') as fitxer:
-            W_l, b_l, iter = pickle.load(fitxer)
+        try:
+            with open(f"algorisme{estructura}.pkl", 'rb') as fitxer:
+                W_l, b_l, iter = pickle.load(fitxer)
+        except FileNotFoundError:
+            pass
 
     pass
 
