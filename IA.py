@@ -111,7 +111,7 @@ if __name__ == '__main__':
     alfa = 0.15
     iter = 0
     W_l, b_l = valors_inicials([784, 16, 10])
-    while alfa < 0.9:
+    while precisió < 0.9:
         iter += 1
 
         Z_l, A_l = propaga(W_l, b_l, entrenament_imatges)
