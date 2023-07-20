@@ -15,6 +15,7 @@ class Activació(Capa):
 
 class Sigmoide(Activació):
     def __init__(self):
+        global sigmoide, d_sigmoide
         def sigmoide(x):
             return 1/(1 + np.exp(-x))
         

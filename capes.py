@@ -10,6 +10,12 @@ class Capa():
     def retropropaga():
         pass
 
+    def __str__(self):
+        return self.__class__.__name__
+    
+    def __repr__(self):
+        return self.__str__()
+
 
 class Perceptró(Capa):
     def __init__(self, dimensions_entrada, dimensions_sortida):
@@ -29,4 +35,10 @@ class Perceptró(Capa):
         self.b -= alfa * 1/m * np.reshape(1/m * np.sum(delta, 1), self.b.shape)
 
         return delta_nou
+    
+    def __str__(self):
+        return self.__class__.__name__ + str(self.W.shape)
+    
+    def __repr__(self):
+        return self.__str__()
         
