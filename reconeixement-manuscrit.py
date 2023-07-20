@@ -1,4 +1,5 @@
 import IA as ia
+from IA import Perceptró, Sigmoide, Softmax
 import threading
 import time
 import numpy as np
@@ -11,7 +12,7 @@ from kivy.config import Config
 from kivy.core.window import Window
 from kivy.graphics import Color, Ellipse, Line
 from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.properties import StringProperty
+from kivy.properties import StringProperty, BooleanProperty
 from PIL import Image, ImageOps
 
 kivy.require('1.9.0')
@@ -21,12 +22,11 @@ class EntrenarPantalla(Screen):
     with informacio_candau:
         informacio = StringProperty("Esperant instruccions")
     text_boto = StringProperty("Inicar entrenament")
-    entrenant = threading.Event()
-    entrenant.clear()
+    entrenant = BooleanProperty(False)
 
     def processa_entrenar(self):
-        if self.entrenant.is_set():
-            self.entrenant.clear()
+        if self.entrenant:
+            self.entrenant = False
             self.thread_entrenar.join()
             with self.informacio_candau:
                 self.informacio = "Esperant instruccions"
@@ -35,40 +35,48 @@ class EntrenarPantalla(Screen):
             with self.informacio_candau:
                 self.informacio = "Iniciant entrenament"
             self.text_boto = "Parar entrenament"
-            self.entrenant.set()
+            self.entrenant = True
             self.thread_entrenar = threading.Thread(target=self.entrenar, daemon=True)
             self.thread_entrenar.start()
     
     def entrenar(self):
-        global W_l, b_l, iter
+        global xarxa, iteracions
         with self.informacio_candau:
             self.informacio = "Llegint dades"
         entrenament_digits, entrenament_imatges, prova_imatges = ia.llegir_dades()
+
+        X = entrenament_imatges
+        Y = ia.one_hot(entrenament_digits)
+
         precisió = 0
         alfa = 0.1
-        while self.entrenant.is_set():
-            iter += 1
+        while self.entrenant:
+            iteracions += 1
 
-            Z_l, A_l = ia.propaga(W_l, b_l, entrenament_imatges)
-            dW_l, db_l = ia.retropropaga(Z_l, A_l, W_l, b_l, entrenament_digits, entrenament_imatges)
+            sortida = X 
+            for capa in xarxa:
+                sortida = capa.propaga(sortida)
 
-            W_l, b_l = ia.actualitza_paràmetres(W_l, b_l, dW_l, db_l, alfa)
-
-            precisió = np.sum(np.argmax(A_l[-1], 0) == entrenament_digits)/entrenament_digits.size
+            precisió = np.sum(np.argmax(sortida, 0) == entrenament_digits)/entrenament_digits.size
 
             with self.informacio_candau:
-                self.informacio = f"Iteració: {iter}, precisió: {precisió*100:.2f}%"
+                self.informacio = f"Iteració: {iteracions}, precisió: {precisió*100:.2f}%"
+
+            alfa = 0.1
+            delta = ia.d_eqm(Y, sortida)
+            for capa in reversed(xarxa):
+                delta = capa.retropropaga(delta, alfa)
 
     def guardar_progres(self):
-        global W_l, b_l, iter, estructura
-        with open(f"algorisme{estructura}.pkl", 'wb') as fitxer:
-            pickle.dump((W_l, b_l, iter), fitxer)
+        global xarxa, iteracions
+        with open(f"algorisme{xarxa}.pkl", 'wb') as fitxer:
+            pickle.dump((xarxa, iteracions), fitxer)
     
     def recuperar_progres(self):
-        global W_l, b_l, iter, estructura
+        global xarxa, iteracions
         try:
-            with open(f"algorisme{estructura}.pkl", 'rb') as fitxer:
-                W_l, b_l, iter = pickle.load(fitxer)
+            with open(f"algorisme{xarxa}.pkl", 'rb') as fitxer:
+                xarxa, iteracions = pickle.load(fitxer)
         except FileNotFoundError:
             pass
 
@@ -78,7 +86,7 @@ class ProvarPantalla(Screen):
     prediccio = StringProperty("Realitza una predicció")
 
     def predieix(self):
-        global W_l, b_l
+        global xarxa
         textura = self.ids.canvas_pintar.export_as_image().texture
         #textura = self.ids.canvas_pintar.texture
         tamany=textura.size
@@ -94,11 +102,13 @@ class ProvarPantalla(Screen):
         #entrenament_digits, entrenament_imatges, prova_imatges = ia.llegir_dades()
         #print(entrenament_imatges.shape)
 
-        _, A_l = ia.propaga(W_l, b_l, imatge)
+        sortida = imatge
+        for capa in xarxa:
+            sortida = capa.propaga(sortida)
         #ia.imprimeix_imatge(imatge.T[0])
-        self.prediccio = f"Predicció: {np.argmax(A_l[-1], 0)[0]} | Confiança: {np.max(A_l[-1], 0)[0]*100:.2f}%"
-        print(str(np.argmax(A_l[-1], 0)))
-        print(str(np.max(A_l[-1], 0)))
+        self.prediccio = f"Predicció: {np.argmax(sortida, 0)[0]} | Confiança: {np.max(sortida, 0)[0]*100:.2f}%"
+        print(str(np.argmax(sortida, 0)))
+        print(str(np.max(sortida, 0)))
 
 
 
@@ -142,7 +152,11 @@ class ReconeixementDigitsApp(App):
         return sm
 
 if __name__ == '__main__':
-    estructura = [784, 256, 128, 64, 10]
-    W_l, b_l = ia.valors_inicials(estructura)
-    iter = 0
+    xarxa = [
+        Perceptró(28**2, 128), 
+        Sigmoide(),
+        Perceptró(128, 10),
+        Softmax(),
+    ]
+    iteracions = 0
     ReconeixementDigitsApp().run()
