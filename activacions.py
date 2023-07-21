@@ -24,6 +24,17 @@ class Sigmoide(Activació):
 
         super().__init__(sigmoide, d_sigmoide)
 
+class ReLU(Activació):
+    def __init__(self):
+        global relu, d_relu
+        def relu(x):
+            return np.maximum(0, x)
+        
+        def d_relu(x):
+            return (x > 0) * 1
+        
+        super().__init__(relu, d_relu)
+
 class Softmax(Capa):
     def propaga(self, x):
         exp = np.exp(x - np.max(x))

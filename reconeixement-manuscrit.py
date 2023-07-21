@@ -1,5 +1,5 @@
 import IA as ia
-from IA import Perceptró, Sigmoide, Softmax
+from IA import Perceptró, Sigmoide, ReLU, Softmax
 import threading
 import time
 import numpy as np
@@ -43,41 +43,64 @@ class EntrenarPantalla(Screen):
         global xarxa, iteracions
         with self.informacio_candau:
             self.informacio = "Llegint dades"
-        entrenament_digits, entrenament_imatges, prova_imatges = ia.llegir_dades()
+        digits, imatges, _ = ia.llegir_dades()
 
-        X = entrenament_imatges
-        Y = ia.one_hot(entrenament_digits)
+        Y, Y_prova = np.split(ia.one_hot(digits), [40000], axis=1)
+        X, X_prova = np.split(imatges, [40000], axis=1)
+
+        tamany_lots = 100
+
+        X_lots = np.split(X, X.shape[1]/tamany_lots, axis=1)
+        Y_lots = np.split(Y, Y.shape[1]/tamany_lots, axis=1)
 
         precisió = 0
         alfa = 0.1
         while self.entrenant:
             iteracions += 1
 
-            sortida = X 
-            for capa in xarxa:
-                sortida = capa.propaga(sortida)
+            for X_lot, Y_lot in zip(X_lots, Y_lots):
+                sortida = xarxa.propaga(X_lot)
 
-            precisió = np.sum(np.argmax(sortida, 0) == entrenament_digits)/entrenament_digits.size
+                xarxa.retropropaga(alfa, ia.d_eqm, Y_lot)
+
+            sortida = xarxa.propaga(X)
+            precisió_entrenament = np.sum(np.argmax(sortida, 0) == np.argmax(Y, 0))/Y.shape[1]
+            sortida = xarxa.propaga(X_prova)
+            precisió_prova = np.sum(np.argmax(sortida, 0) == np.argmax(Y_prova, 0))/Y_prova.shape[1]
 
             with self.informacio_candau:
-                self.informacio = f"Iteració: {iteracions}, precisió: {precisió*100:.2f}%"
+                self.informacio = f"Iteració: {iteracions}, precisió: {precisió_entrenament*100:.2f}%, precisió real: {precisió_prova*100:.2f}%"
 
-            alfa = 0.1
-            delta = ia.d_eqm(Y, sortida)
-            for capa in reversed(xarxa):
-                delta = capa.retropropaga(delta, alfa)
 
     def guardar_progres(self):
+        thread = threading.Thread(target=self.escriure_progress)
+        thread.start()
+        with self.informacio_candau:
+                self.informacio = "Escrivint"
+
+    def escriure_progress(self):
         global xarxa, iteracions
         with open(f"algorisme{xarxa}.pkl", 'wb') as fitxer:
             pickle.dump((xarxa, iteracions), fitxer)
+        with self.informacio_candau:
+            self.informacio = "Progress guardat"
     
     def recuperar_progres(self):
+        thread = threading.Thread(target=self.llegir_progress)
+        thread.start()
+        with self.informacio_candau:
+                self.informacio = "Llegint"
+
+    def llegir_progress(self):
         global xarxa, iteracions
         try:
             with open(f"algorisme{xarxa}.pkl", 'rb') as fitxer:
                 xarxa, iteracions = pickle.load(fitxer)
+            with self.informacio_candau:
+                self.informacio = "Progress recuperat"
         except FileNotFoundError:
+            with self.informacio_candau:
+                self.informacio = "Error, no s'ha trobat el fitxer"
             pass
 
     pass
@@ -92,7 +115,7 @@ class ProvarPantalla(Screen):
         tamany=textura.size
         canvas=textura.pixels
         imatge = Image.frombytes(mode='RGBA', size=tamany, data=canvas)
-        imatge = imatge.resize((28,28))
+        imatge = imatge.resize((28,28), Image.LANCZOS)
         imatge = imatge.convert('L')
         imatge = ImageOps.invert(imatge)
         imatge = np.array(imatge).reshape(784, 1)
@@ -102,10 +125,7 @@ class ProvarPantalla(Screen):
         #entrenament_digits, entrenament_imatges, prova_imatges = ia.llegir_dades()
         #print(entrenament_imatges.shape)
 
-        sortida = imatge
-        for capa in xarxa:
-            sortida = capa.propaga(sortida)
-        #ia.imprimeix_imatge(imatge.T[0])
+        sortida = xarxa.propaga(imatge)
         self.prediccio = f"Predicció: {np.argmax(sortida, 0)[0]} | Confiança: {np.max(sortida, 0)[0]*100:.2f}%"
         print(str(np.argmax(sortida, 0)))
         print(str(np.max(sortida, 0)))
@@ -152,11 +172,11 @@ class ReconeixementDigitsApp(App):
         return sm
 
 if __name__ == '__main__':
-    xarxa = [
+    xarxa = ia.XarxaNeuronal([
         Perceptró(28**2, 128), 
-        Sigmoide(),
+        ReLU(),
         Perceptró(128, 10),
         Softmax(),
-    ]
+    ])
     iteracions = 0
     ReconeixementDigitsApp().run()

@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
+from xarxa_neuronal import XarxaNeuronal
 from capes import Perceptró
-from activacions import Sigmoide, Softmax
+from activacions import Sigmoide, ReLU, Softmax
 from errors import eqm, d_eqm
 
 def processa_imatges(imatges):
@@ -44,26 +45,29 @@ def main():
     X = entrenament_imatges
     Y = one_hot(entrenament_digits)
 
-    xarxa = [
+    tamany_lots = 100
+    X_lots = np.split(X, X.shape[1]/tamany_lots, axis=1)
+    Y_lots = np.split(Y, Y.shape[1]/tamany_lots, axis=1)
+
+    xarxa = XarxaNeuronal([
         Perceptró(28**2, 128), 
-        Sigmoide(),
+        ReLU(),
         Perceptró(128, 10),
         Softmax(),
-    ]
+    ])
 
+    alfa = 0.1
+    
     iteracions = 1000
     for i in range(iteracions):
-        sortida = X 
-        for capa in xarxa:
-            sortida = capa.propaga(sortida)
-        
+        for X_lot, Y_lot in zip(X_lots, Y_lots):
+            sortida = xarxa.propaga(X_lot)
+
+            xarxa.retropropaga(alfa, d_eqm, Y_lot)
+
+        sortida = xarxa.propaga(X)
         precisió = np.sum(np.argmax(sortida, 0) == entrenament_digits)/entrenament_digits.size
         print(f"Iteració: {i}; precisió: {precisió*100:.2f}%")
-
-        alfa = 0.1
-        delta = d_eqm(Y, sortida)
-        for capa in reversed(xarxa):
-            delta = capa.retropropaga(delta, alfa)
 
 
 if __name__ == '__main__':
