@@ -43,6 +43,7 @@ class EntrenarPantalla(Screen):
         global xarxa, iteracions
         with self.informacio_candau:
             self.informacio = "Llegint dades"
+
         digits, imatges, _ = ia.llegir_dades()
 
         Y, Y_prova = np.split(ia.one_hot(digits), [40000], axis=1)
@@ -57,11 +58,14 @@ class EntrenarPantalla(Screen):
         alfa = 0.1
         while self.entrenant:
             iteracions += 1
+            temp = np.random.permutation(len(X.T))
+            X = X.T[temp].T
+            Y = Y.T[temp].T
 
             for X_lot, Y_lot in zip(X_lots, Y_lots):
                 sortida = xarxa.propaga(X_lot)
 
-                xarxa.retropropaga(alfa, ia.d_eqm, Y_lot)
+                xarxa.retropropaga(alfa, ia.d_eqm, Y_lot, iteracions)
 
             sortida = xarxa.propaga(X)
             precisió_entrenament = np.sum(np.argmax(sortida, 0) == np.argmax(Y, 0))/Y.shape[1]
@@ -70,6 +74,7 @@ class EntrenarPantalla(Screen):
 
             with self.informacio_candau:
                 self.informacio = f"Iteració: {iteracions}, precisió: {precisió_entrenament*100:.2f}%, precisió real: {precisió_prova*100:.2f}%"
+
 
 
     def guardar_progres(self):
@@ -173,9 +178,13 @@ class ReconeixementDigitsApp(App):
 
 if __name__ == '__main__':
     xarxa = ia.XarxaNeuronal([
-        Perceptró(28**2, 128), 
+        Perceptró(28**2, 1024, optimitzador='adam'), 
         ReLU(),
-        Perceptró(128, 10),
+        Perceptró(1024, 256, optimitzador='adam'), 
+        ReLU(),
+        Perceptró(256, 128, optimitzador='adam'), 
+        ReLU(),
+        Perceptró(128, 10, optimitzador='adam'),
         Softmax(),
     ])
     iteracions = 0

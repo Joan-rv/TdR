@@ -10,7 +10,7 @@ class Activació(Capa):
         self.entrada = entrada
         return self.funció(entrada)
     
-    def retropropaga(self, delta, _):
+    def retropropaga(self, delta, *_):
         return self.derivada(self.entrada) * delta
 
 class Sigmoide(Activació):
@@ -37,10 +37,10 @@ class ReLU(Activació):
 
 class Softmax(Capa):
     def propaga(self, x):
-        exp = np.exp(x - np.max(x))
+        exp = np.exp(x - np.max(x, axis=0))
         return exp / exp.sum(axis=0)
         
-    def retropropaga(self, delta, alfa):
+    def retropropaga(self, delta, *_):
         return delta
         #n = np.size(self.sortida)
         #return ((np.identity(n) - self.sortida.T) * self.sortida).dot(delta)

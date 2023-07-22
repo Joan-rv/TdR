@@ -8,10 +8,10 @@ class XarxaNeuronal():
             self.sortida = capa.propaga(self.sortida)
         return self.sortida
     
-    def retropropaga(self, alfa, d_error, Y):
+    def retropropaga(self, alfa, d_error, Y, iter):
         delta = d_error(Y, self.sortida)
         for capa in reversed(self.capes):
-            delta = capa.retropropaga(delta, alfa)
+            delta = capa.retropropaga(delta, alfa, iter)
     
     def __srt__(self):
         return self.capes.__str__()
