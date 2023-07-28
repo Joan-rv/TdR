@@ -81,16 +81,5 @@ def main():
         precisió_prova = np.sum(np.argmax(sortida, 0) == np.argmax(Y_prova, 0))/Y_prova.shape[1]
         print(f"Iteració: {i}; precisió: {precisió_entrenament*100:.2f}%, precisió real: {precisió_prova*100:.2f}%")
 
-def main2():
-    digits, imatges, _ = llegir_dades()
-
-    Y, Y_prova = np.split(one_hot(digits), [40000], axis=1)
-    X, X_prova = np.split(imatges, [40000], axis=1)
-
-    X = X.T.reshape((-1, 28, 28, 1))
-
-    xarxa = Convolucional(1, 28, 64, 3)
-    _ = xarxa.propaga(X)
-
 if __name__ == '__main__':
-    main2()
+    main()

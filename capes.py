@@ -41,12 +41,12 @@ class Perceptró(Capa):
         delta_nou = self.W.T.dot(delta)
 
 
-        #dW = 1/m * delta.dot(self.entrada.T)
-        #db = np.reshape(1/m * np.sum(delta, 1), self.b.shape)
+        dW = 1/m * delta.dot(self.entrada.T)
+        db = np.reshape(1/m * np.sum(delta, 1), self.b.shape)
 
-        #self.W, self.b = self.optimitzador.actualitza(alfa, self.W, dW, self.b, db, iter)
-        self.W -= alfa * 1/m * delta.dot(self.entrada.T)
-        self.b -= alfa * 1/m * np.reshape(1/m * np.sum(delta, 1), self.b.shape)
+        self.W, self.b = self.optimitzador.actualitza(alfa, self.W, dW, self.b, db, iter)
+        #self.W -= alfa * 1/m * delta.dot(self.entrada.T)
+        #self.b -= alfa * 1/m * np.reshape(1/m * np.sum(delta, 1), self.b.shape)
 
         return delta_nou
 
