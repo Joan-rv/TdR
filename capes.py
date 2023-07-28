@@ -21,10 +21,9 @@ class Capa():
 class Perceptró(Capa):
     def __init__(self, dimensions_entrada, dimensions_sortida, optimitzador='cap'):
         # inicialització Xavier
-        maxim = (1.0 / np.sqrt(dimensions_entrada + dimensions_sortida))
-        minim = - maxim
-        self.W = minim + np.random.random((dimensions_sortida, dimensions_entrada)) * (maxim - minim)
-        self.b = minim + np.random.random((dimensions_sortida, 1)) * (maxim - minim)
+        desviació_estàndard = np.sqrt(2/(dimensions_entrada + dimensions_sortida)) 
+        self.W = np.random.normal(0, desviació_estàndard, (dimensions_sortida, dimensions_entrada))
+        self.b = np.random.normal(0, desviació_estàndard, (dimensions_sortida, 1))
         if optimitzador == 'cap':
             self.optimitzador = optimitzadors.Cap()
         elif optimitzador == 'adam':
@@ -56,4 +55,3 @@ class Perceptró(Capa):
     
     def __repr__(self):
         return self.__str__()
-        

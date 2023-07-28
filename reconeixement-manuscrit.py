@@ -124,7 +124,6 @@ class ProvarPantalla(Screen):
         imatge = imatge.convert('L')
         imatge = ImageOps.invert(imatge)
         imatge = np.array(imatge).reshape(784, 1)
-        #imatge = np.frombuffer(imatge.tobytes(), dtype=np.uint8).reshape(784, 1)
         imatge = imatge / 255.0
 
         #entrenament_digits, entrenament_imatges, prova_imatges = ia.llegir_dades()
@@ -134,6 +133,7 @@ class ProvarPantalla(Screen):
         self.prediccio = f"Predicció: {np.argmax(sortida, 0)[0]} | Confiança: {np.max(sortida, 0)[0]*100:.2f}%"
         print(str(np.argmax(sortida, 0)))
         print(str(np.max(sortida, 0)))
+    
 
 
 

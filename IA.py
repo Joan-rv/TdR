@@ -1,10 +1,13 @@
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
+import matplotlib
 from xarxa_neuronal import XarxaNeuronal
 from capes import Perceptró
 from activacions import Sigmoide, ReLU, Softmax
 from errors import eqm, d_eqm
+
+matplotlib.use('TkAgg')
 
 def processa_imatges(imatges):
     imatges = (imatges-np.min(imatges))/(np.max(imatges)-np.min(imatges))
@@ -17,8 +20,8 @@ def one_hot(Y):
         y_one_hot[y] = 1
     return Y_one_hot.T
 
-def imprimeix_imatge(image):
-    pixels = image.reshape((28, 28))
+def imprimeix_imatge(imatge):
+    pixels = imatge.reshape((28, 28))
     plt.imshow(pixels, cmap='Greys_r')
     plt.axis('off')
     plt.show()
@@ -80,6 +83,16 @@ def main():
         precisió_prova = np.sum(np.argmax(sortida, 0) == np.argmax(Y_prova, 0))/Y_prova.shape[1]
         print(f"Iteració: {i}; precisió: {precisió_entrenament*100:.2f}%, precisió real: {precisió_prova*100:.2f}%")
 
+def main2():
+    digits, imatges, _ = llegir_dades()
+
+    Y, Y_prova = np.split(one_hot(digits), [40000], axis=1)
+    X, X_prova = np.split(imatges, [40000], axis=1)
+
+    X = X.T.reshape((-1, 28, 28, 1))
+
+    xarxa = Convolucional(1, 28, 64, 3)
+    _ = xarxa.propaga(X)
 
 if __name__ == '__main__':
-    main()
+    main2()
