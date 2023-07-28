@@ -5,9 +5,7 @@ import matplotlib
 from xarxa_neuronal import XarxaNeuronal
 from capes import Perceptró
 from activacions import Sigmoide, ReLU, Softmax
-from errors import eqm, d_eqm
-
-matplotlib.use('TkAgg')
+from errors import eqm, d_eqm, entropia_creuada, d_entropia_creuada
 
 def processa_imatges(imatges):
     imatges = (imatges-np.min(imatges))/(np.max(imatges)-np.min(imatges))
