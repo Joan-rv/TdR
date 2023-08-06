@@ -79,9 +79,9 @@ class EntrenarPantalla(Screen):
 
     def guardar_progres(self):
         thread = threading.Thread(target=self.escriure_progress)
-        thread.start()
         with self.informacio_candau:
                 self.informacio = "Escrivint"
+        thread.start()
 
     def escriure_progress(self):
         global xarxa, iteracions
@@ -92,9 +92,9 @@ class EntrenarPantalla(Screen):
     
     def recuperar_progres(self):
         thread = threading.Thread(target=self.llegir_progress)
-        thread.start()
         with self.informacio_candau:
                 self.informacio = "Llegint"
+        thread.start()
 
     def llegir_progress(self):
         global xarxa, iteracions
