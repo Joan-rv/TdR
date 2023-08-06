@@ -148,7 +148,7 @@ class Pintar(Widget):
         with self.canvas:   
             if self.collide_point(*touch.pos):
                 Color(0, 0, 0)
-                d = 30
+                d = 20
                 self.ellipses.append(Ellipse(pos=(touch.x - d / 2, touch.y - d / 2), size=(d, d)))
                 touch.ud['line'] = Line(points=(touch.x, touch.y), width= d / 2)
                 self.lines.append(touch.ud['line'])
@@ -159,7 +159,7 @@ class Pintar(Widget):
         else:
             with self.canvas:
                 Color(0, 0, 0)
-                d = 30
+                d = 20
                 touch.ud['line'] = Line(points=(touch.x, touch.y), width= d / 2)
                 self.lines.append(touch.ud['line'])
 
