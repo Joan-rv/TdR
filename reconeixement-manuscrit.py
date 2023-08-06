@@ -176,7 +176,8 @@ class ReconeixementDigitsApp(App):
         
         return sm
 
-if __name__ == '__main__':
+def main():
+    global xarxa
     xarxa = ia.XarxaNeuronal([
         Perceptró(28**2, 1024, optimitzador='adam'), 
         ReLU(),
@@ -187,5 +188,11 @@ if __name__ == '__main__':
         Perceptró(128, 10, optimitzador='adam'),
         Softmax(),
     ])
+
+    global iteracions
     iteracions = 0
+
     ReconeixementDigitsApp().run()
+
+if __name__ == '__main__':
+    main()
