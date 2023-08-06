@@ -65,7 +65,7 @@ def main():
         Softmax(),
     ])
 
-    alfa = 0.1
+    alfa = 0.001
 
     iteracions = 10000
     for i in range(1, iteracions):

@@ -55,7 +55,7 @@ class EntrenarPantalla(Screen):
         Y_lots = np.split(Y, Y.shape[1]/tamany_lots, axis=1)
 
         precisió = 0
-        alfa = 0.1
+        alfa = 0.001
         while self.entrenant:
             iteracions += 1
             temp = np.random.permutation(len(X.T))
