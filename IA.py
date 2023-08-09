@@ -57,11 +57,11 @@ def main():
     
     xarxa = XarxaNeuronal([
         Aplana(),
-        Perceptró(28**2, 256, optimitzador='cap'), 
+        Perceptró(28**2, 256, optimitzador='adam'), 
         ReLU(),
-        Perceptró(256, 128, optimitzador='cap'), 
+        Perceptró(256, 128, optimitzador='adam'), 
         ReLU(),
-        Perceptró(128, 10, optimitzador='cap'),
+        Perceptró(128, 10, optimitzador='adam'),
         Softmax(),
     ])
 
@@ -76,8 +76,6 @@ def main():
 
 
         sortida = xarxa.propaga(X)
-        print(np.argmax(sortida, 0))
-        print(np.argmax(Y, 0))
         precisió_entrenament = np.sum(np.argmax(sortida, 0) == np.argmax(Y, 0))/Y.shape[1]
         sortida = xarxa.propaga(X_prova)
         precisió_prova = np.sum(np.argmax(sortida, 0) == np.argmax(Y_prova, 0))/Y_prova.shape[1]
