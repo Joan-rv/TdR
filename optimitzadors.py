@@ -19,11 +19,11 @@ class Adam(Optimitzador):
     def actualitza(self, alfa, W, dW, b, db, iter):
         self.m_dW = self.beta1 * self.m_dW + (1 - self.beta1) * dW
         self.m_db = self.beta1 * self.m_db + (1 - self.beta1) * db
-        self.v_dW = self.beta2 * self.v_dW + (1 - self.beta2) * np.square(dW)
-        self.v_db = self.beta2 * self.v_db + (1 - self.beta2) * np.square(db)
-
-        beta1_elevat = np.power(self.beta1, iter)
-        beta2_elevat = np.power(self.beta2, iter)
+        self.v_dW = self.beta2 * self.v_dW + (1 - self.beta2) * dW**2
+        self.v_db = self.beta2 * self.v_db + (1 - self.beta2) * db**2
+        
+        beta1_elevat = self.beta1**iter
+        beta2_elevat = self.beta2**iter
         m_corregit_dW = self.m_dW/(1 - beta1_elevat)
         m_corregit_db = self.m_db/(1 - beta1_elevat)
         v_corregit_dW = self.v_dW/(1 - beta2_elevat)
