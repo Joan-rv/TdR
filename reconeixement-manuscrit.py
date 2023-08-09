@@ -132,10 +132,6 @@ class ProvarPantalla(Screen):
         imatge = imatge / 255.0
         imatge = np.pad(imatge, 4)
 
-        graf = threading.Thread(target=ia.imprimeix_imatge, args=(imatge,))
-        graf.start()
-
-
         sortida = xarxa.propaga(imatge)
         self.prediccio = f"Predicció: {np.argmax(sortida, 0)[0]} | Confiança: {np.max(sortida, 0)[0]*100:.2f}%"
         print(str(np.argmax(sortida, 0)))
