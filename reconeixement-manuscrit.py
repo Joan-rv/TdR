@@ -117,23 +117,29 @@ class ProvarPantalla(Screen):
         global xarxa
         textura = self.ids.canvas_pintar.export_as_image().texture
         #textura = self.ids.canvas_pintar.texture
-        tamany=textura.size
-        canvas=textura.pixels
+        tamany = textura.size
+        canvas = textura.pixels
         imatge = Image.frombytes(mode='RGBA', size=tamany, data=canvas)
-        imatge = imatge.resize((28,28), Image.LANCZOS)
         imatge = imatge.convert('L')
         imatge = ImageOps.invert(imatge)
-        imatge = np.array(imatge).reshape(784, 1)
+        imatge = imatge.crop(imatge.getbbox())
+        amplada, altura = imatge.size
+        nou_tamany = np.maximum(amplada, altura)
+        imatge_nova = Image.new(imatge.mode, (nou_tamany, nou_tamany), (0))
+        imatge_nova.paste(imatge, box=(int((nou_tamany - amplada)/2), int((nou_tamany - altura)/2)))
+        imatge = imatge_nova.resize((20, 20))
+        imatge = np.array(imatge)
         imatge = imatge / 255.0
+        imatge = np.pad(imatge, 4)
 
-        #entrenament_digits, entrenament_imatges, prova_imatges = ia.llegir_dades()
-        #print(entrenament_imatges.shape)
+        graf = threading.Thread(target=ia.imprimeix_imatge, args=(imatge,))
+        graf.start()
+
 
         sortida = xarxa.propaga(imatge)
         self.prediccio = f"Predicció: {np.argmax(sortida, 0)[0]} | Confiança: {np.max(sortida, 0)[0]*100:.2f}%"
         print(str(np.argmax(sortida, 0)))
         print(str(np.max(sortida, 0)))
-    
 
 
 
