@@ -62,7 +62,7 @@ class Aplana(Capa):
 
     def propaga(self, entrada):
         self.forma = entrada.shape
-        return entrada.reshape(entrada.shape[0], -1)
+        return entrada.reshape(entrada.shape[0], -1).T
 
     def retropropaga(self, delta, *_):
             return delta.reshape(self.forma)
