@@ -126,7 +126,7 @@ class ProvarPantalla(Screen):
         amplada, altura = imatge.size
         nou_tamany = np.maximum(amplada, altura)
         imatge_nova = Image.new(imatge.mode, (nou_tamany, nou_tamany), (0))
-        imatge_nova.paste(imatge, box=(int((nou_tamany - amplada)/2), int((nou_tamany - altura)/2)))
+        imatge_nova.paste(imatge, box=((nou_tamany - amplada)//2, (nou_tamany - altura)//2))
         imatge = imatge_nova.resize((20, 20))
         imatge = np.array(imatge)
         imatge = imatge / 255.0
