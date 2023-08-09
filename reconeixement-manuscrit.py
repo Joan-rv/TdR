@@ -1,5 +1,5 @@
 import IA as ia
-from IA import Perceptró, Sigmoide, ReLU, Softmax
+from IA import Perceptró, Aplana, Sigmoide, ReLU, Softmax
 import threading
 import time
 import numpy as np
@@ -46,21 +46,21 @@ class EntrenarPantalla(Screen):
 
         digits, imatges, _ = ia.llegir_dades()
 
+        X, X_prova = np.split(imatges, [40000])
         Y, Y_prova = np.split(ia.one_hot(digits), [40000], axis=1)
-        X, X_prova = np.split(imatges, [40000], axis=1)
+
+        temp = np.random.permutation(len(X))
+        X = X[temp]
+        Y = Y.T[temp].T
 
         tamany_lots = 100
-
-        X_lots = np.split(X, X.shape[1]/tamany_lots, axis=1)
+        X_lots = np.split(X, X.shape[0]/tamany_lots)
         Y_lots = np.split(Y, Y.shape[1]/tamany_lots, axis=1)
 
         precisió = 0
         alfa = 0.001
         while self.entrenant:
             iteracions += 1
-            temp = np.random.permutation(len(X.T))
-            X = X.T[temp].T
-            Y = Y.T[temp].T
 
             for X_lot, Y_lot in zip(X_lots, Y_lots):
                 sortida = xarxa.propaga(X_lot)
@@ -179,6 +179,7 @@ class ReconeixementDigitsApp(App):
 def main():
     global xarxa
     xarxa = ia.XarxaNeuronal([
+        Aplana(),
         Perceptró(28**2, 1024, optimitzador='adam'), 
         ReLU(),
         Perceptró(1024, 256, optimitzador='adam'), 

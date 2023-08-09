@@ -55,3 +55,14 @@ class Perceptró(Capa):
     
     def __repr__(self):
         return self.__str__()
+
+class Aplana(Capa):
+    def __init__(self):
+        pass
+
+    def propaga(self, entrada):
+        self.forma = entrada.shape
+        return entrada.reshape(entrada.shape[0], -1)
+
+    def retropropaga(self, delta, *_):
+            return delta.reshape(self.forma)

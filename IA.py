@@ -3,14 +3,12 @@ import pandas as pd
 from matplotlib import pyplot as plt
 import matplotlib
 from xarxa_neuronal import XarxaNeuronal
-from capes import Perceptró
+from capes import Perceptró, Aplana
 from activacions import Sigmoide, ReLU, Softmax
 from errors import eqm, d_eqm, entropia_creuada, d_entropia_creuada
 
 def processa_imatges(imatges):
-    imatges = (imatges-np.min(imatges))/(np.max(imatges)-np.min(imatges))
-    imatges = imatges.T
-    return imatges
+    return (imatges-np.min(imatges))/(np.max(imatges)-np.min(imatges))
 
 def one_hot(Y):
     Y_one_hot = np.zeros((Y.shape[0], 10))
@@ -44,19 +42,21 @@ def main():
     np.seterr(all='raise', under='ignore')
 
     digits, imatges, _ = llegir_dades()
+    imatges = np.reshape(imatges, (-1, 28, 28))
 
+    X, X_prova = np.split(imatges, [40000])
     Y, Y_prova = np.split(one_hot(digits), [40000], axis=1)
-    X, X_prova = np.split(imatges, [40000], axis=1)
 
-    temp = np.random.permutation(len(X.T))
-    X = X.T[temp].T
-    Y = Y.T[temp].T   
+    temp = np.random.permutation(len(X))
+    X = X[temp]
+    Y = Y.T[temp].T
 
     tamany_lots = 100
-    X_lots = np.split(X, X.shape[1]/tamany_lots, axis=1)
+    X_lots = np.split(X, X.shape[0]/tamany_lots)
     Y_lots = np.split(Y, Y.shape[1]/tamany_lots, axis=1)
-
+    
     xarxa = XarxaNeuronal([
+        Aplana(),
         Perceptró(28**2, 256, optimitzador='cap'), 
         ReLU(),
         Perceptró(256, 128, optimitzador='cap'), 
@@ -76,6 +76,8 @@ def main():
 
 
         sortida = xarxa.propaga(X)
+        print(np.argmax(sortida, 0))
+        print(np.argmax(Y, 0))
         precisió_entrenament = np.sum(np.argmax(sortida, 0) == np.argmax(Y, 0))/Y.shape[1]
         sortida = xarxa.propaga(X_prova)
         precisió_prova = np.sum(np.argmax(sortida, 0) == np.argmax(Y_prova, 0))/Y_prova.shape[1]
