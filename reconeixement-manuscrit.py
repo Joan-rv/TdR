@@ -184,7 +184,7 @@ def main():
     xarxa = ia.XarxaNeuronal([
         Convolució(3, 16, 1, (28, 28)),
         ReLU(),
-        MaxPooling(forma_pool=(3,3)),
+        MaxPooling(dim_pool=3),
         Aplana(),
         Perceptró(1568, 256, optimitzador='adam'), 
         ReLU(),

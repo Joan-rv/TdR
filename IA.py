@@ -57,7 +57,7 @@ def main():
     xarxa = XarxaNeuronal([
         Convolució(3, 16, 1, (28,28)),
         ReLU(),
-        MaxPooling((3,3)),
+        MaxPooling(3),
         Aplana(),
         Perceptró(1296, 256, optimitzador='adam'), 
         ReLU(),

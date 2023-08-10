@@ -69,9 +69,9 @@ class Aplana(Capa):
             return delta.reshape(self.forma)
 
 class MaxPooling(Capa):
-    def __init__(self, forma_pool = (2, 2)):
-        self.forma = forma_pool 
-        self.tamany = forma_pool[0]*forma_pool[1]
+    def __init__(self, dim_pool = 2):
+        self.forma = (dim_pool, dim_pool) 
+        self.tamany = dim_pool**2
     
     def propaga(self, entrada):
         self.entrada = entrada
@@ -96,12 +96,14 @@ class MaxPooling(Capa):
         delta_amplada, delta_altura = delta.shape[2:]
         delta = delta.reshape(delta.shape[0], delta.shape[1], -1)
         delta_nou = np.zeros(self.entrada.shape)
-        for i in range(delta.shape[0]):
-            for j in range(delta.shape[1]):
-                for k in range(delta.shape[2]):
-                    index = (int(self.forma[0]*(k % delta_amplada) + self.index_maxs[i,j,k] % self.forma[0]),
-                             int(self.forma[1]*(k // delta_altura) + self.index_maxs[i,j,k] // self.forma[1]))
-                    delta_nou[i, j, *index] = delta[i,j,k]
+
+        quocients, residus = np.divmod(self.index_maxs, self.forma[0])
+        x = np.arange(delta.shape[2])
+        index_x = (residus + self.forma[0]*(x % delta_amplada)).astype(int)
+        index_y = (quocients + self.forma[0]*(x // delta_amplada)).astype(int)
+        print(delta.shape)
+        delta_nou[:,:,index_x, index_y] = delta
+
         return delta_nou
 
 class Convolució(Capa):
