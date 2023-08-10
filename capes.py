@@ -1,14 +1,15 @@
 import numpy as np
+from scipy.signal import convolve2d, correlate2d
 import optimitzadors
 
 class Capa():
     def __init__(self):
         pass
 
-    def propaga():
+    def propaga(self):
         pass
 
-    def retropropaga():
+    def retropropaga(self):
         pass
 
     def __str__(self):
@@ -74,6 +75,8 @@ class MaxPooling(Capa):
     
     def propaga(self, entrada):
         self.entrada = entrada
+        entrada = np.pad(entrada, ((0,0), (0,0), (0, self.forma[0] - entrada.shape[2] % self.forma[0]),
+                                   (0, self.forma[1] - entrada.shape[3] % self.forma[1])), constant_values=-np.inf)
         n_entrades, canals, altura, amplada = entrada.shape
         sortida_altura = altura // self.forma[0]
         sortida_amplada = amplada // self.forma[1]
@@ -82,20 +85,23 @@ class MaxPooling(Capa):
 
         for i in range(entrada.shape[0]):
             for j in range(entrada.shape[1]):
-                blocs = np.array(np.split(entrada[i,j], self.forma[0], axis=1)).reshape(-1, self.tamany)
+                blocs = entrada[i,j].reshape((-1, self.forma[0], entrada.shape[3]//self.forma[1], self.forma[1])).transpose((0,2,1,3)).reshape(-1, self.tamany)
                 self.blocs = blocs
                 self.index_maxs[i,j] = np.argmax(blocs, axis=1)
-                sortida[i,j] = np.max(blocs, axis=1).reshape(self.forma)
+                sortida[i,j] = np.max(blocs, axis=1).reshape(sortida.shape[2:])
 
         return sortida
     
     def retropropaga(self, delta, *_):
+        delta_amplada, delta_altura = delta.shape[2:]
+        delta = delta.reshape(delta.shape[0], delta.shape[1], -1)
         delta_nou = np.zeros(self.entrada.shape)
         for i in range(delta.shape[0]):
             for j in range(delta.shape[1]):
-                for k, (index, valor) in enumerate(zip(self.index_maxs[i, j], delta[i,j].flatten())):
-                    index = [int(sum(x)) for x in zip((self.forma[0]*(k % self.forma[0]), self.forma[1]*(k // self.forma[1])), (index % self.forma[0], index // self.forma[1]))]
-                    delta_nou[i, j, *index] = valor
+                for k in range(delta.shape[2]):
+                    index = (int(self.forma[0]*(k % delta_amplada) + self.index_maxs[i,j,k] % self.forma[0]),
+                             int(self.forma[1]*(k // delta_altura) + self.index_maxs[i,j,k] // self.forma[1]))
+                    delta_nou[i, j, *index] = delta[i,j,k]
         return delta_nou
 
 class Convolució(Capa):
