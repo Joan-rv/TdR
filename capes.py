@@ -66,3 +66,34 @@ class Aplana(Capa):
 
     def retropropaga(self, delta, *_):
             return delta.reshape(self.forma)
+
+class MaxPooling(Capa):
+    def __init__(self, forma_pool = (2, 2)):
+        self.forma = forma_pool 
+        self.tamany = forma_pool[0]*forma_pool[1]
+    
+    def propaga(self, entrada):
+        self.entrada = entrada
+        n_entrades, canals, altura, amplada = entrada.shape
+        sortida_altura = altura // self.forma[0]
+        sortida_amplada = amplada // self.forma[1]
+        sortida = np.zeros((n_entrades, canals, sortida_altura, sortida_amplada))
+        self.index_maxs = np.zeros((n_entrades, canals, sortida_amplada*sortida_altura))
+
+        for i in range(entrada.shape[0]):
+            for j in range(entrada.shape[1]):
+                blocs = np.array(np.split(entrada[i,j], self.forma[0], axis=1)).reshape(-1, self.tamany)
+                self.blocs = blocs
+                self.index_maxs[i,j] = np.argmax(blocs, axis=1)
+                sortida[i,j] = np.max(blocs, axis=1).reshape(self.forma)
+
+        return sortida
+    
+    def retropropaga(self, delta, *_):
+        delta_nou = np.zeros(self.entrada.shape)
+        for i in range(delta.shape[0]):
+            for j in range(delta.shape[1]):
+                for k, (index, valor) in enumerate(zip(self.index_maxs[i, j], delta[i,j].flatten())):
+                    index = [int(sum(x)) for x in zip((self.forma[0]*(k % self.forma[0]), self.forma[1]*(k // self.forma[1])), (index % self.forma[0], index // self.forma[1]))]
+                    delta_nou[i, j, *index] = valor
+        return delta_nou

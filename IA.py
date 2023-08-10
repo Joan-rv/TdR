@@ -3,7 +3,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 import matplotlib
 from xarxa_neuronal import XarxaNeuronal
-from capes import Perceptró, Aplana
+from capes import Perceptró, Aplana, MaxPooling
 from activacions import Sigmoide, ReLU, Softmax
 from errors import eqm, d_eqm, entropia_creuada, d_entropia_creuada
 
