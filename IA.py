@@ -1,9 +1,8 @@
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
-import matplotlib
 from xarxa_neuronal import XarxaNeuronal
-from capes import Perceptró, Aplana, MaxPooling
+from capes import Perceptró, Aplana, MaxPooling, Convolució
 from activacions import Sigmoide, ReLU, Softmax
 from errors import eqm, d_eqm, entropia_creuada, d_entropia_creuada
 
@@ -42,7 +41,7 @@ def main():
     np.seterr(all='raise', under='ignore')
 
     digits, imatges, _ = llegir_dades()
-    imatges = np.reshape(imatges, (-1, 28, 28))
+    imatges = np.reshape(imatges, (-1, 1, 28, 28))
 
     X, X_prova = np.split(imatges, [40000])
     Y, Y_prova = np.split(one_hot(digits), [40000], axis=1)
@@ -56,8 +55,11 @@ def main():
     Y_lots = np.split(Y, Y.shape[1]/tamany_lots, axis=1)
     
     xarxa = XarxaNeuronal([
+        Convolució(3, 16, 1, (28,28)),
+        ReLU(),
+        MaxPooling((3,3)),
         Aplana(),
-        Perceptró(28**2, 256, optimitzador='adam'), 
+        Perceptró(1296, 256, optimitzador='adam'), 
         ReLU(),
         Perceptró(256, 128, optimitzador='adam'), 
         ReLU(),
@@ -67,7 +69,7 @@ def main():
 
     alfa = 0.001
 
-    iteracions = 10000
+    iteracions = 2
     for i in range(1, iteracions):
         for X_lot, Y_lot in zip(X_lots, Y_lots):
             sortida = xarxa.propaga(X_lot)

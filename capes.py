@@ -97,3 +97,33 @@ class MaxPooling(Capa):
                     index = [int(sum(x)) for x in zip((self.forma[0]*(k % self.forma[0]), self.forma[1]*(k // self.forma[1])), (index % self.forma[0], index // self.forma[1]))]
                     delta_nou[i, j, *index] = valor
         return delta_nou
+
+class Convolució(Capa):
+    def __init__(self, dim_kernel, n_kernels, n_canals, forma_entrada):
+        self.forma_kernels = (dim_kernel, dim_kernel)
+        self.forma_sortida = (forma_entrada[0] - dim_kernel + 1, forma_entrada[1] - dim_kernel + 1)
+        self.n_kernels = n_kernels
+        self.kernels = np.random.randn(n_kernels, n_canals, *self.forma_kernels)
+        self.biaix = np.random.randn(n_kernels, *self.forma_sortida)
+
+    def propaga(self, entrada):
+        self.entrada = entrada
+        sortida = np.zeros((entrada.shape[0], *self.biaix.shape))
+        for i in range(entrada.shape[0]):
+            for j in range(entrada.shape[1]):
+                for k in range(self.kernels.shape[0]):
+                    sortida[i,k] += correlate2d(entrada[i,j], self.kernels[k, j], mode='valid') + self.biaix[k]
+
+        return sortida
+    
+    def retropropaga(self, delta, alfa, iter):
+        dK = np.zeros_like(self.kernels)
+        delta_nou = np.zeros((100, 1, 28, 28))
+        for i in range(self.entrada.shape[0]):
+            for j in range(self.entrada.shape[1]):
+                for k in range(self.kernels.shape[0]):
+                    dK[k,j] += correlate2d(self.entrada[i,j], delta[i,k], mode='valid')
+                    delta_nou[i,j] += correlate2d(delta[i,k], self.kernels[k,j], mode='full')
+        
+        self.kernels -= alfa * dK
+        self.biaix -= alfa * np.sum(delta)
