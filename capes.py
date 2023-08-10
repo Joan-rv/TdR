@@ -101,7 +101,6 @@ class MaxPooling(Capa):
         x = np.arange(delta.shape[2])
         index_x = (residus + self.forma[0]*(x % delta_amplada)).astype(int)
         index_y = (quocients + self.forma[0]*(x // delta_amplada)).astype(int)
-        print(delta.shape)
         delta_nou[:,:,index_x, index_y] = delta
 
         return delta_nou
