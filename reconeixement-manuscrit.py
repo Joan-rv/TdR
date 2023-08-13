@@ -177,15 +177,15 @@ class ReconeixementDigitsApp(App):
 def main():
     global xarxa
     xarxa = ia.XarxaNeuronal([
-        Convolució(3, 16, 1, (28, 28)),
+        Convolució(3, 16),
         ReLU(),
         MaxPooling(dim_pool=2),
         Aplana(),
-        Perceptró(2704, 256, optimitzador='adam'), 
+        Perceptró(256, optimitzador='adam'), 
         ReLU(),
-        Perceptró(256, 128, optimitzador='adam'), 
+        Perceptró(128, optimitzador='adam'), 
         ReLU(),
-        Perceptró(128, 10, optimitzador='adam'),
+        Perceptró(10, optimitzador='adam'),
         Softmax(),
     ])
 

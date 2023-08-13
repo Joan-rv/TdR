@@ -55,15 +55,15 @@ def main():
     Y_lots = np.split(Y, Y.shape[1]/tamany_lots, axis=1)
     
     xarxa = XarxaNeuronal([
-        Convolució(3, 16, 1, (28,28)),
+        Convolució(3, 16),
         ReLU(),
         MaxPooling(2),
         Aplana(),
-        Perceptró(2704, 256, optimitzador='adam'), 
+        Perceptró(256, optimitzador='adam'), 
         ReLU(),
-        Perceptró(256, 128, optimitzador='adam'), 
+        Perceptró(128, optimitzador='adam'), 
         ReLU(),
-        Perceptró(128, 10, optimitzador='adam'),
+        Perceptró(10, optimitzador='adam'),
         Softmax(),
     ])
 

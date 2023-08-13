@@ -20,14 +20,23 @@ class Capa():
 
 
 class Perceptró(Capa):
-    def __init__(self, dimensions_entrada, dimensions_sortida, optimitzador='cap'):
-        # inicialització Xavier
-        desviació_estàndard = np.sqrt(2/(dimensions_entrada + dimensions_sortida)) 
-        self.W = np.random.normal(0, desviació_estàndard, (dimensions_sortida, dimensions_entrada))
-        self.b = np.random.normal(0, desviació_estàndard, (dimensions_sortida, 1))
-        self.optimitzador = optimitzadors.text_a_optimitzador(optimitzador, dimensions_sortida, dimensions_entrada)
+    def paràmetres_inicials(self, dim_entrada, dim_sortida, optimitzador):
+        desviació_estàndard = np.sqrt(2/(dim_entrada + dim_sortida)) 
+        W = np.random.normal(0, desviació_estàndard, (dim_sortida, dim_entrada))
+        b = np.random.normal(0, desviació_estàndard, (dim_sortida, 1))
+        optimitzador = optimitzadors.text_a_optimitzador(optimitzador, dim_sortida, dim_entrada)
+        return W, b, optimitzador
+
+    def __init__(self, dim_sortida, dim_entrada = None, optimitzador='cap'):
+        self.dim_sortida = dim_sortida
+        self.optimitzador = optimitzador
+        self.W, self.b = None, None
+        if dim_entrada is not None:
+            self.W, self.b, self.optimitzador = self.paràmetres_inicials(dim_entrada, dim_sortida, optimitzador)
     
     def propaga(self, entrada):
+        if self.W is None:
+            self.W, self.b, self.optimitzador = self.paràmetres_inicials(entrada.shape[0], self.dim_sortida, self.optimitzador)
         self.entrada = entrada
         return self.W.dot(entrada) + self.b
 
@@ -107,15 +116,25 @@ class MaxPooling(Capa):
         return self.__str__()
 
 class Convolució(Capa):
-    def __init__(self, dim_kernel, n_kernels, n_canals, forma_entrada, optimitzador='cap'):
-        self.forma_kernels = (dim_kernel, dim_kernel)
-        self.forma_sortida = (forma_entrada[0] - dim_kernel + 1, forma_entrada[1] - dim_kernel + 1)
+    def paràmetres_inicials(self, n_kernels, forma_entrada, dim_kernel, optimitzador):
+        self.forma_sortida = (forma_entrada[2] - dim_kernel + 1, forma_entrada[3] - dim_kernel + 1)
+        kernels = np.random.randn(n_kernels, forma_entrada[1], dim_kernel, dim_kernel)
+        biaix = np.random.randn(n_kernels, *self.forma_sortida)
+        optimitzador = optimitzadors.text_a_optimitzador(optimitzador, self.forma_sortida, forma_entrada)
+        return kernels, biaix, optimitzador
+    def __init__(self, dim_kernel, n_kernels, forma_entrada=None, optimitzador='cap'):
         self.n_kernels = n_kernels
-        self.kernels = np.random.randn(n_kernels, n_canals, *self.forma_kernels)
-        self.biaix = np.random.randn(n_kernels, *self.forma_sortida)
-        self.optimitzador = optimitzadors.text_a_optimitzador(optimitzador, self.forma_sortida, forma_entrada)
+        self.dim_kernel = dim_kernel
+        self.optimitzador = optimitzador
+        
+        self.kernels, self.biaix = None, None
+        if forma_entrada is not None:
+            self.kernels, self.biaix, self.optimitzador = self.paràmetres_inicials(n_kernels, forma_entrada, dim_kernel, optimitzador)
+
 
     def propaga(self, entrada):
+        if self.kernels is None:
+            self.kernels, self.biaix, self.optimitzador = self.paràmetres_inicials(self.n_kernels, entrada.shape, self.dim_kernel, self.optimitzador)
         self.entrada = entrada
         sortida = np.zeros((entrada.shape[0], *self.biaix.shape))
         for i in range(entrada.shape[0]):
@@ -139,6 +158,6 @@ class Convolució(Capa):
         #self.biaix -= alfa * np.sum(delta)
     
     def __srt__(self):
-        return self.__class__.__name__ + str(self.forma_kernels) + str(self.forma_sortida) + str(self.n_kernels)
+        return self.__class__.__name__ + str(self.dim_kernel) + str(self.forma_sortida) + str(self.n_kernels)
     def __repr__(self):
         return self.__srt__()
