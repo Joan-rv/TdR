@@ -18,22 +18,18 @@ from PIL import Image, ImageOps
 kivy.require('1.9.0')
 
 class EntrenarPantalla(Screen):
-    informacio_candau = threading.Lock()
-    with informacio_candau:
-        informacio = StringProperty("Esperant instruccions")
+    informacio = StringProperty("Esperant instruccions")
     text_boto = StringProperty("Inicar entrenament")
     entrenant = BooleanProperty(False)
+    no_pot_marxar = BooleanProperty(False)
 
     def processa_entrenar(self):
+        self.text_boto = "Aturant entrenament"
+        self.informacio = "Aturant entrenament"
         if self.entrenant:
             self.entrenant = False
-            self.thread_entrenar.join()
-            with self.informacio_candau:
-                self.informacio = "Esperant instruccions"
-            self.text_boto = "Reprendre entrenament"
         else:
-            with self.informacio_candau:
-                self.informacio = "Iniciant entrenament"
+            self.informacio = "Iniciant entrenament"
             self.text_boto = "Parar entrenament"
             self.entrenant = True
             self.thread_entrenar = threading.Thread(target=self.entrenar, daemon=True)
@@ -41,8 +37,7 @@ class EntrenarPantalla(Screen):
     
     def entrenar(self):
         global xarxa, iteracions
-        with self.informacio_candau:
-            self.informacio = "Llegint dades"
+        self.informacio = "Llegint dades"
 
         digits, imatges, _ = ia.llegir_dades()
         imatges = imatges.reshape(-1, 1, 28, 28)
@@ -60,6 +55,8 @@ class EntrenarPantalla(Screen):
 
         precisió = 0
         alfa = 0.001
+        self.informacio = "Iniciant entrenament"
+        self.no_pot_marxar = True
         while self.entrenant:
             iteracions += 1
 
@@ -73,28 +70,27 @@ class EntrenarPantalla(Screen):
             sortida = xarxa.propaga(X_prova)
             precisió_prova = np.sum(np.argmax(sortida, 0) == np.argmax(Y_prova, 0))/Y_prova.shape[1]
 
-            with self.informacio_candau:
-                self.informacio = f"Iteració: {iteracions}, precisió: {precisió_entrenament*100:.2f}%, precisió real: {precisió_prova*100:.2f}%"
+            self.informacio = f"Iteració: {iteracions}, precisió: {precisió_entrenament*100:.2f}%, precisió real: {precisió_prova*100:.2f}%"
+        self.no_pot_marxar = False
+        self.informacio = "Esperant instruccions"
+        self.text_boto = "Reprendre entrenament"
 
 
 
     def guardar_progres(self):
         thread = threading.Thread(target=self.escriure_progress)
-        with self.informacio_candau:
-                self.informacio = "Escrivint"
+        self.informacio = "Escrivint"
         thread.start()
 
     def escriure_progress(self):
         global xarxa, iteracions
         with open(f"algorisme{xarxa}.pkl", 'wb') as fitxer:
             pickle.dump((xarxa, iteracions), fitxer)
-        with self.informacio_candau:
             self.informacio = "Progress guardat"
     
     def recuperar_progres(self):
         thread = threading.Thread(target=self.llegir_progress)
-        with self.informacio_candau:
-                self.informacio = "Llegint"
+        self.informacio = "Llegint"
         thread.start()
 
     def llegir_progress(self):
@@ -102,11 +98,9 @@ class EntrenarPantalla(Screen):
         try:
             with open(f"algorisme{xarxa}.pkl", 'rb') as fitxer:
                 xarxa, iteracions = pickle.load(fitxer)
-            with self.informacio_candau:
                 self.informacio = "Progress recuperat"
         except FileNotFoundError:
-            with self.informacio_candau:
-                self.informacio = "Error, no s'ha trobat el fitxer"
+            self.informacio = "Error, no s'ha trobat el fitxer"
             pass
 
     pass
@@ -132,6 +126,7 @@ class ProvarPantalla(Screen):
         imatge = np.array(imatge)
         imatge = imatge / 255.0
         imatge = np.pad(imatge, 4)
+        imatge = imatge.reshape(1, 1, 28, 28)
 
         sortida = xarxa.propaga(imatge)
         self.prediccio = f"Predicció: {np.argmax(sortida, 0)[0]} | Confiança: {np.max(sortida, 0)[0]*100:.2f}%"
@@ -184,9 +179,9 @@ def main():
     xarxa = ia.XarxaNeuronal([
         Convolució(3, 16, 1, (28, 28)),
         ReLU(),
-        MaxPooling(dim_pool=3),
+        MaxPooling(dim_pool=2),
         Aplana(),
-        Perceptró(1568, 256, optimitzador='adam'), 
+        Perceptró(2704, 256, optimitzador='adam'), 
         ReLU(),
         Perceptró(256, 128, optimitzador='adam'), 
         ReLU(),

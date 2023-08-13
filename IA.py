@@ -6,8 +6,8 @@ from capes import Perceptró, Aplana, MaxPooling, Convolució
 from activacions import Sigmoide, ReLU, Softmax
 from errors import eqm, d_eqm, entropia_creuada, d_entropia_creuada
 
-def processa_imatges(imatges):
-    return (imatges-np.min(imatges))/(np.max(imatges)-np.min(imatges))
+def normalitza_dades(dades):
+    return (dades-np.min(dades))/(np.max(dades)-np.min(dades))
 
 def one_hot(Y):
     Y_one_hot = np.zeros((Y.shape[0], 10))
@@ -33,8 +33,8 @@ def llegir_dades():
     # Obtenir primera columna
     entrenament_digits = entrenament[:, 0]
     # Obtenir les imatges i processar-les per facilitar les operacions
-    entrenament_imatges = processa_imatges(entrenament[:, 1:])
-    prova_imatges = processa_imatges(prova)
+    entrenament_imatges = normalitza_dades(entrenament[:, 1:])
+    prova_imatges = normalitza_dades(prova)
     return entrenament_digits, entrenament_imatges, prova_imatges
 
 def main():
@@ -57,9 +57,9 @@ def main():
     xarxa = XarxaNeuronal([
         Convolució(3, 16, 1, (28,28)),
         ReLU(),
-        MaxPooling(3),
+        MaxPooling(2),
         Aplana(),
-        Perceptró(1296, 256, optimitzador='adam'), 
+        Perceptró(2704, 256, optimitzador='adam'), 
         ReLU(),
         Perceptró(256, 128, optimitzador='adam'), 
         ReLU(),

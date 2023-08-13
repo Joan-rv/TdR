@@ -7,6 +7,14 @@ class Optimitzador():
     def actualitza(self):
         pass
 
+def text_a_optimitzador(text, dimensions_sortida, dimensions_entrada):
+    if text == 'cap':
+        return Cap()
+    elif text == 'adam':
+        return Adam(dimensions_sortida, dimensions_entrada)
+    else:
+        raise Exception(f"Optimitzador {text} desconegut")
+
 class Adam(Optimitzador):
     def __init__(self, dimensions_sortida, dimensions_entrada, beta1 = 0.1, beta2 = 0.999, epsilon = 1e-8):
         self.beta1 = beta1
