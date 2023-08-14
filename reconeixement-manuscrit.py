@@ -177,9 +177,9 @@ class ReconeixementDigitsApp(App):
 def main():
     global xarxa
     xarxa = ia.XarxaNeuronal([
-        Convolució(3, 16),
+        Convolució(3, 32),
         ReLU(),
-        MaxPooling(dim_pool=2),
+        MaxPooling(dim_pool=3),
         Aplana(),
         Perceptró(256, optimitzador='adam'), 
         ReLU(),

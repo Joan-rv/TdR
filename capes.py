@@ -56,7 +56,7 @@ class Perceptró(Capa):
         return delta_nou
 
     def __str__(self):
-        return self.__class__.__name__ + str(self.dim_sortida) + self.optimitzador.__class__.__name__
+        return self.__class__.__name__ + str((self.dim_sortida, self.optimitzador.__class__.__name__))
     
     def __repr__(self):
         return self.__str__()
@@ -111,7 +111,7 @@ class MaxPooling(Capa):
         return delta_nou
     
     def __str__(self):
-        return self.__class__.__name__ + str(self.forma[0])
+        return self.__class__.__name__ + str((self.forma[0]))
     def __repr__(self):
         return self.__str__()
 
@@ -154,10 +154,9 @@ class Convolució(Capa):
                     delta_nou[i,j] += correlate2d(delta[i,k], self.kernels[k,j], mode='full')
         
         self.kernels, self.biaix = self.optimitzador.actualitza(alfa, self.kernels, dK, self.biaix, np.sum(delta), iter)
-        #self.kernels -= alfa * dK
-        #self.biaix -= alfa * np.sum(delta)
     
     def __srt__(self):
-        return self.__class__.__name__ + str(self.dim_kernel) + str(self.n_kernels)
+        return self.__class__.__name__ + str((self.dim_kernel, self.n_kernels))
+
     def __repr__(self):
         return self.__srt__()
