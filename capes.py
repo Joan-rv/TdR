@@ -56,7 +56,7 @@ class Perceptró(Capa):
         return delta_nou
 
     def __str__(self):
-        return self.__class__.__name__ + str(self.W.shape) + self.optimitzador.__class__.__name__
+        return self.__class__.__name__ + str(self.dim_sortida) + self.optimitzador.__class__.__name__
     
     def __repr__(self):
         return self.__str__()
@@ -158,6 +158,6 @@ class Convolució(Capa):
         #self.biaix -= alfa * np.sum(delta)
     
     def __srt__(self):
-        return self.__class__.__name__ + str(self.dim_kernel) + str(self.forma_sortida) + str(self.n_kernels)
+        return self.__class__.__name__ + str(self.dim_kernel) + str(self.n_kernels)
     def __repr__(self):
         return self.__srt__()
