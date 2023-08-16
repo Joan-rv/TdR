@@ -5,21 +5,8 @@ from xarxa_neuronal import XarxaNeuronal
 from capes import Perceptró, Aplana, MaxPooling, Convolució
 from activacions import Sigmoide, ReLU, Softmax
 from errors import eqm, d_eqm, entropia_creuada, d_entropia_creuada
+from utils import normalitza_dades, one_hot, imprimeix_imatge
 
-def normalitza_dades(dades):
-    return (dades-np.min(dades))/(np.max(dades)-np.min(dades))
-
-def one_hot(Y):
-    Y_one_hot = np.zeros((Y.shape[0], 10))
-    for (y, y_one_hot) in zip(Y, Y_one_hot):
-        y_one_hot[y] = 1
-    return Y_one_hot.T
-
-def imprimeix_imatge(imatge):
-    pixels = imatge.reshape((28, 28))
-    plt.imshow(pixels, cmap='Greys_r')
-    plt.axis('off')
-    plt.show()
 
 def llegir_dades():
     # Llegir CSV i guardar en variables
