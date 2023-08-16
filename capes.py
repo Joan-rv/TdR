@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.signal import convolve2d, correlate2d
 import optimitzadors
+import utils
 
 class Capa():
     def __init__(self):
@@ -45,13 +46,10 @@ class Perceptró(Capa):
 
         delta_nou = self.W.T.dot(delta)
 
-
         dW = 1/m * delta.dot(self.entrada.T)
         db = np.reshape(1/m * np.sum(delta, 1), self.b.shape)
 
         self.W, self.b = self.optimitzador.actualitza(alfa, self.W, dW, self.b, db, iter)
-        #self.W -= alfa * 1/m * delta.dot(self.entrada.T)
-        #self.b -= alfa * 1/m * np.reshape(1/m * np.sum(delta, 1), self.b.shape)
 
         return delta_nou
 
@@ -78,38 +76,42 @@ class MaxPooling(Capa):
         self.tamany = dim_pool**2
     
     def propaga(self, entrada):
-        self.entrada = entrada
+        self.entrada_forma_vell = entrada.shape
         if entrada.shape[2] % self.forma[0] != 0 or entrada.shape[3] % self.forma[1] != 0:
             entrada = np.pad(entrada, ((0,0), (0,0), (0, self.forma[0] - entrada.shape[2] % self.forma[0]),
                                     (0, self.forma[1] - entrada.shape[3] % self.forma[1])), constant_values=-np.inf)
+        self.entrada_forma = entrada.shape
         n_entrades, canals, altura, amplada = entrada.shape
         sortida_altura = altura // self.forma[0]
         sortida_amplada = amplada // self.forma[1]
         sortida = np.zeros((n_entrades, canals, sortida_altura, sortida_amplada))
-        self.index_maxs = np.zeros((n_entrades, canals, sortida_amplada*sortida_altura))
+        self.index_maxs = np.zeros((n_entrades, canals, sortida_amplada*sortida_altura, self.tamany))
 
         for i in range(entrada.shape[0]):
             for j in range(entrada.shape[1]):
-                blocs = entrada[i,j].reshape((-1, self.forma[0], entrada.shape[3]//self.forma[1], self.forma[1])).transpose((0,2,1,3)).reshape(-1, self.tamany)
+                blocs = entrada[i,j].reshape((-1, self.forma[0], sortida_amplada, self.forma[1])).transpose((0,2,1,3)).reshape(-1, self.tamany)
                 self.blocs = blocs
-                self.index_maxs[i,j] = np.argmax(blocs, axis=1)
                 sortida[i,j] = np.max(blocs, axis=1).reshape(sortida.shape[2:])
+                self.index_maxs[i,j] = (blocs == sortida[i,j].reshape((-1, 1)))
 
         return sortida
-    
+
     def retropropaga(self, delta, *_):
-        delta_amplada, delta_altura = delta.shape[2:]
-        delta = delta.reshape(delta.shape[0], delta.shape[1], -1)
-        delta_nou = np.zeros(self.entrada.shape)
+        # delta_amplada, delta_altura = delta.shape[2:]
+        delta = delta.reshape(delta.shape[0], delta.shape[1], -1, 1)
+        # delta_nou = np.zeros(self.entrada.shape)
+        delta_nou = self.index_maxs * delta
+        delta_nou = delta_nou.reshape((*delta.shape[:2], -1, self.forma[0], self.entrada_forma[3]//self.forma[1], self.forma[1])).transpose((0, 1, 2, 4, 3, 5)).reshape(self.entrada_forma)
+        return delta_nou[..., 0:self.entrada_forma_vell[2], 0:self.entrada_forma_vell[3]]
 
-        quocients, residus = np.divmod(self.index_maxs, self.forma[0])
-        x = np.arange(delta.shape[2])
-        index_x = (residus + self.forma[0]*(x % delta_amplada)).astype(int)
-        index_y = (quocients + self.forma[0]*(x // delta_altura)).astype(int)
-        delta_nou.reshape((-1))[..., index_y + index_x * delta_nou.shape[3]] = delta
+        # quocients, residus = np.divmod(self.index_maxs, self.forma[0])
+        # x = np.arange(delta.shape[2])
+        # index_x = (residus + self.forma[0]*(x % delta_amplada)).astype(int)
+        # index_y = (quocients + self.forma[0]*(x // delta_altura)).astype(int)
+        # delta_nou.reshape((-1))[..., index_y + index_x * delta_nou.shape[3]] = delta
 
-        return delta_nou
-    
+        # return delta_nou
+
     def __str__(self):
         return self.__class__.__name__ + str((self.forma[0]))
     def __repr__(self):
