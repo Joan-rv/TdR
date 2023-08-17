@@ -31,7 +31,7 @@ class Perceptró(Capa):
     def __init__(self, dim_sortida, dim_entrada = None, optimitzador='cap'):
         self.dim_sortida = dim_sortida
         self.optimitzador = optimitzador
-        self.W, self.b = None, None
+        self.W, self.b, self.optimitzador = None, None, optimitzadors.text_a_optimitzador(optimitzador, 0, 0)
         if dim_entrada is not None:
             self.W, self.b, self.optimitzador = self.paràmetres_inicials(dim_entrada, dim_sortida, optimitzador)
     

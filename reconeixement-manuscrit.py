@@ -62,6 +62,8 @@ class EntrenarPantalla(Screen):
 
             precisió = 0
             for X_lot, Y_lot in zip(X_lots, Y_lots):
+                if not self.entrenant:
+                    break
                 sortida = xarxa.propaga(X_lot)
                 precisió += np.sum(np.argmax(sortida, 0) == np.argmax(Y_lot, 0))/Y.shape[1]
 
@@ -83,7 +85,7 @@ class EntrenarPantalla(Screen):
         global xarxa, iteracions
         with open(f"algorisme{xarxa}.pkl", 'wb') as fitxer:
             pickle.dump((xarxa, iteracions), fitxer)
-            self.informacio = "Progress guardat"
+            self.informacio = "Progrés guardat"
     
     def recuperar_progres(self):
         thread = threading.Thread(target=self.llegir_progress)
@@ -93,9 +95,10 @@ class EntrenarPantalla(Screen):
     def llegir_progress(self):
         global xarxa, iteracions
         try:
+            print(xarxa)
             with open(f"algorisme{xarxa}.pkl", 'rb') as fitxer:
                 xarxa, iteracions = pickle.load(fitxer)
-                self.informacio = "Progress recuperat"
+                self.informacio = "Progrés recuperat"
         except FileNotFoundError:
             self.informacio = "Error, no s'ha trobat el fitxer"
             pass
@@ -123,7 +126,7 @@ class ProvarPantalla(Screen):
         imatge = np.array(imatge)
         imatge = imatge / 255.0
         imatge = np.pad(imatge, 4)
-        imatge = imatge.reshape(1, 1, 28, 28)
+        imatge = imatge.reshape(1, 28, 28, 1)
 
         sortida = xarxa.propaga(imatge)
         self.prediccio = f"Predicció: {np.argmax(sortida, 0)[0]} | Confiança: {np.max(sortida, 0)[0]*100:.2f}%"
