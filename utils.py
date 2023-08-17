@@ -16,7 +16,6 @@ def imprimeix_imatge(imatge):
     plt.axis('off')
     plt.show()
 
-def finestres(a, forma_finestres, gambada=1):
+def finestres(a, forma_finestres, gambada_x=1, gambada_y=1):
     a = np.lib.stride_tricks.sliding_window_view(a, forma_finestres, axis=(-2, -1))
-    print(a.shape)
-    return a[...,0::gambada,:,:]
+    return a[...,0::gambada_x,0::gambada_y,:,:]
