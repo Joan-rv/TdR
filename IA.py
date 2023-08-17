@@ -28,7 +28,7 @@ def main():
     np.seterr(all='raise', under='ignore')
 
     digits, imatges, _ = llegir_dades()
-    imatges = np.reshape(imatges, (-1, 1, 28, 28))
+    imatges = np.reshape(imatges, (-1, 28, 28, 1))
 
     X, X_prova = np.split(imatges, [40000])
     Y, Y_prova = np.split(one_hot(digits), [40000], axis=1)

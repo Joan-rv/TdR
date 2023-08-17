@@ -40,7 +40,7 @@ class EntrenarPantalla(Screen):
         self.informacio = "Llegint dades"
 
         digits, imatges, _ = ia.llegir_dades()
-        imatges = imatges.reshape(-1, 1, 28, 28)
+        imatges = imatges.reshape(-1, 28, 28, 1)
 
         X, X_prova = np.split(imatges, [40000])
         Y, Y_prova = np.split(ia.one_hot(digits), [40000], axis=1)
