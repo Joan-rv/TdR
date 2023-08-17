@@ -60,17 +60,14 @@ class EntrenarPantalla(Screen):
         while self.entrenant:
             iteracions += 1
 
+            precisió = 0
             for X_lot, Y_lot in zip(X_lots, Y_lots):
                 sortida = xarxa.propaga(X_lot)
+                precisió += np.sum(np.argmax(sortida, 0) == np.argmax(Y_lot, 0))/Y.shape[1]
 
                 xarxa.retropropaga(alfa, ia.d_eqm, Y_lot, iteracions)
 
-            sortida = xarxa.propaga(X)
-            precisió_entrenament = np.sum(np.argmax(sortida, 0) == np.argmax(Y, 0))/Y.shape[1]
-            sortida = xarxa.propaga(X_prova)
-            precisió_prova = np.sum(np.argmax(sortida, 0) == np.argmax(Y_prova, 0))/Y_prova.shape[1]
-
-            self.informacio = f"Iteració: {iteracions}, precisió: {precisió_entrenament*100:.2f}%, precisió real: {precisió_prova*100:.2f}%"
+            self.informacio = f"Iteració: {iteracions}, precisió: {precisió*100:.2f}%"
         self.no_pot_marxar = False
         self.informacio = "Esperant instruccions"
         self.text_boto = "Reprendre entrenament"

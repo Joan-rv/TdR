@@ -58,17 +58,14 @@ def main():
 
     iteracions = 2
     for i in range(1, iteracions):
+        precisió = 0
         for X_lot, Y_lot in zip(X_lots, Y_lots):
             sortida = xarxa.propaga(X_lot)
+            precisió += np.sum(np.argmax(sortida, 0) == np.argmax(Y_lot, 0))/Y.shape[1]
 
             xarxa.retropropaga(alfa, d_eqm, Y_lot, i)
 
-
-        sortida = xarxa.propaga(X)
-        precisió_entrenament = np.sum(np.argmax(sortida, 0) == np.argmax(Y, 0))/Y.shape[1]
-        sortida = xarxa.propaga(X_prova)
-        precisió_prova = np.sum(np.argmax(sortida, 0) == np.argmax(Y_prova, 0))/Y_prova.shape[1]
-        print(f"Iteració: {i}; precisió: {precisió_entrenament*100:.2f}%, precisió real: {precisió_prova*100:.2f}%")
+        print(f"Iteració: {i}; precisió: {precisió*100:.2f}%")
 
 if __name__ == '__main__':
     main()
