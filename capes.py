@@ -21,19 +21,21 @@ class Capa():
 
 
 class Perceptró(Capa):
-    def paràmetres_inicials(self, dim_entrada, dim_sortida, optimitzador):
+    def paràmetres_inicials(self, dim_entrada, dim_sortida, optimitzador_txt):
         desviació_estàndard = np.sqrt(2/(dim_entrada + dim_sortida)) 
         W = np.random.normal(0, desviació_estàndard, (dim_sortida, dim_entrada))
         b = np.random.normal(0, desviació_estàndard, (dim_sortida, 1))
-        optimitzador = optimitzadors.text_a_optimitzador(optimitzador, dim_sortida, dim_entrada)
+        optimitzador = optimitzadors.text_a_optimitzador(optimitzador_txt, dim_sortida, dim_entrada)
         return W, b, optimitzador
 
     def __init__(self, dim_sortida, dim_entrada = None, optimitzador='cap'):
         self.dim_sortida = dim_sortida
-        self.optimitzador = optimitzador
-        self.W, self.b, self.optimitzador = None, None, optimitzadors.text_a_optimitzador(optimitzador, 0, 0)
+        self.optimitzador_txt = optimitzador
         if dim_entrada is not None:
             self.W, self.b, self.optimitzador = self.paràmetres_inicials(dim_entrada, dim_sortida, optimitzador)
+        else:
+            self.W, self.b, self.optimitzador = None, None, optimitzadors.text_a_optimitzador(optimitzador, 0, 0)
+
     
     def propaga(self, entrada):
         if self.W is None:
