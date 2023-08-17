@@ -84,16 +84,9 @@ class MaxPooling(Capa):
         n_entrades, canals, altura, amplada = entrada.shape
         sortida_altura = altura // self.forma[0]
         sortida_amplada = amplada // self.forma[1]
-        sortida = np.zeros((n_entrades, canals, sortida_altura, sortida_amplada))
-        self.index_maxs = np.zeros((n_entrades, canals, sortida_amplada*sortida_altura, self.tamany))
-
-        for i in range(entrada.shape[0]):
-            for j in range(entrada.shape[1]):
-                blocs = entrada[i,j].reshape((-1, self.forma[0], sortida_amplada, self.forma[1])).transpose((0,2,1,3)).reshape(-1, self.tamany)
-                self.blocs = blocs
-                sortida[i,j] = np.max(blocs, axis=1).reshape(sortida.shape[2:])
-                self.index_maxs[i,j] = (blocs == sortida[i,j].reshape((-1, 1)))
-
+        blocs = utils.finestres(entrada, self.forma, gambada_x=self.forma[0], gambada_y=self.forma[1]).reshape(*entrada.shape[:2], -1, self.tamany)
+        sortida = np.max(blocs, axis=3).reshape((n_entrades, canals, sortida_altura, sortida_amplada))
+        self.index_maxs = (blocs == sortida.reshape((*sortida.shape[:-2], -1, 1)))
         return sortida
 
     def retropropaga(self, delta, *_):
@@ -103,14 +96,6 @@ class MaxPooling(Capa):
         delta_nou = self.index_maxs * delta
         delta_nou = delta_nou.reshape((*delta.shape[:2], -1, self.forma[0], self.entrada_forma[3]//self.forma[1], self.forma[1])).transpose((0, 1, 2, 4, 3, 5)).reshape(self.entrada_forma)
         return delta_nou[..., 0:self.entrada_forma_vell[2], 0:self.entrada_forma_vell[3]]
-
-        # quocients, residus = np.divmod(self.index_maxs, self.forma[0])
-        # x = np.arange(delta.shape[2])
-        # index_x = (residus + self.forma[0]*(x % delta_amplada)).astype(int)
-        # index_y = (quocients + self.forma[0]*(x // delta_altura)).astype(int)
-        # delta_nou.reshape((-1))[..., index_y + index_x * delta_nou.shape[3]] = delta
-
-        # return delta_nou
 
     def __str__(self):
         return self.__class__.__name__ + str((self.forma[0]))
