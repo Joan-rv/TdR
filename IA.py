@@ -12,10 +12,9 @@ def llegir_dades():
     # Llegir CSV i guardar en variables
     entrenament = pd.read_csv("train.csv").to_numpy()
     prova = pd.read_csv("test.csv").to_numpy()
-    
+
     # Ordre aleatori
     np.random.shuffle(entrenament)
-
 
     # Obtenir primera columna
     entrenament_digits = entrenament[:, 0]
@@ -23,6 +22,7 @@ def llegir_dades():
     entrenament_imatges = normalitza_dades(entrenament[:, 1:])
     prova_imatges = normalitza_dades(prova)
     return entrenament_digits, entrenament_imatges, prova_imatges
+
 
 def main():
     np.seterr(all='raise', under='ignore')
@@ -40,15 +40,15 @@ def main():
     tamany_lots = 100
     X_lots = np.split(X, X.shape[0]/tamany_lots)
     Y_lots = np.split(Y, Y.shape[1]/tamany_lots, axis=1)
-    
+
     xarxa = XarxaNeuronal([
         Convolució(3, 16),
         ReLU(),
         MaxPooling(2),
         Aplana(),
-        Perceptró(256, optimitzador='adam'), 
+        Perceptró(256, optimitzador='adam'),
         ReLU(),
-        Perceptró(128, optimitzador='adam'), 
+        Perceptró(128, optimitzador='adam'),
         ReLU(),
         Perceptró(10, optimitzador='adam'),
         Softmax(),
@@ -61,11 +61,13 @@ def main():
         precisió = 0
         for X_lot, Y_lot in zip(X_lots, Y_lots):
             sortida = xarxa.propaga(X_lot)
-            precisió += np.sum(np.argmax(sortida, 0) == np.argmax(Y_lot, 0))/Y.shape[1]
+            precisió += np.sum(np.argmax(sortida, 0) ==
+                               np.argmax(Y_lot, 0))/Y.shape[1]
 
             xarxa.retropropaga(alfa, d_eqm, Y_lot, i)
 
         print(f"Iteració: {i}; precisió: {precisió*100:.2f}%")
+
 
 if __name__ == '__main__':
     main()

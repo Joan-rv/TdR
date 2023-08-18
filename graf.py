@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 from matplotlib import colors
 import numpy as np
 
+
 def eixos(ax):
     ax.margins(x=0)
     ax.set_xlim()
@@ -12,8 +13,10 @@ def eixos(ax):
     ax.spines['left'].set_visible(True)
     ax.spines['bottom'].set_visible(True)
 
+
 def sigmoide(x):
     return 1/(1 + np.exp(-x))
+
 
 x = np.linspace(-2, 2, 100)
 fig, ax = plt.subplots()
@@ -82,7 +85,6 @@ def graficà_3d_model(model, nom_fitxer_sortida):
     x = np.linspace(0, 1, 101)
     y = np.linspace(0, 1, 101)
 
-
     X, Y = np.meshgrid(x, y)
     xs = X.flatten()
     ys = Y.flatten()
@@ -95,7 +97,8 @@ def graficà_3d_model(model, nom_fitxer_sortida):
     Z = model.propaga(entrada)
     Z = Z.reshape((101, 101))
     norm = colors.TwoSlopeNorm(vmin=-1.5, vcenter=0, vmax=0.5)
-    ax.plot_surface(X, Y, Z, cmap=colors.LinearSegmentedColormap.from_list('rg',["r", "g"], N=2), rstride=2, cstride=2, norm=norm)
+    ax.plot_surface(X, Y, Z, cmap=colors.LinearSegmentedColormap.from_list(
+        'rg', ["r", "g"], N=2), rstride=2, cstride=2, norm=norm)
     Z = np.zeros_like(Z)
     ax.plot_surface(X, Y, Z, alpha=0.2)
 
@@ -105,14 +108,15 @@ def graficà_3d_model(model, nom_fitxer_sortida):
 
     plt.savefig(nom_fitxer_sortida, bbox_inches='tight')
 
+
 xarxa = XarxaNeuronal([
     Perceptró(2, 2),
     Sigmoide(),
     Perceptró(2, 1),
-    #Escalonada(),
+    # Escalonada(),
 ])
 
-X = np.array([[0,0], [0,1], [1,0], [1,1]]).T
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]]).T
 Y = np.array([[-1], [1], [1], [-1]]).T
 
 alfa = 0.1
@@ -135,7 +139,7 @@ xarxa = XarxaNeuronal([
     Perceptró(2, 1),
 ])
 
-X = np.array([[0,0], [0,1], [1,0], [1,1]]).T
+X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]]).T
 Y = np.array([[-1], [-1], [-1], [1]]).T
 
 alfa = 0.1

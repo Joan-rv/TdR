@@ -17,6 +17,7 @@ from PIL import Image, ImageOps
 
 kivy.require('1.9.0')
 
+
 class EntrenarPantalla(Screen):
     informacio = StringProperty("Esperant instruccions")
     text_boto = StringProperty("Inicar entrenament")
@@ -32,9 +33,10 @@ class EntrenarPantalla(Screen):
             self.informacio = "Iniciant entrenament"
             self.text_boto = "Parar entrenament"
             self.entrenant = True
-            self.thread_entrenar = threading.Thread(target=self.entrenar, daemon=True)
+            self.thread_entrenar = threading.Thread(
+                target=self.entrenar, daemon=True)
             self.thread_entrenar.start()
-    
+
     def entrenar(self):
         global xarxa, iteracions
         self.informacio = "Llegint dades"
@@ -65,7 +67,8 @@ class EntrenarPantalla(Screen):
                 if not self.entrenant:
                     break
                 sortida = xarxa.propaga(X_lot)
-                precisió += np.sum(np.argmax(sortida, 0) == np.argmax(Y_lot, 0))/Y.shape[1]
+                precisió += np.sum(np.argmax(sortida, 0) ==
+                                   np.argmax(Y_lot, 0))/Y.shape[1]
 
                 xarxa.retropropaga(alfa, ia.d_eqm, Y_lot, iteracions)
 
@@ -73,8 +76,6 @@ class EntrenarPantalla(Screen):
         self.no_pot_marxar = False
         self.informacio = "Esperant instruccions"
         self.text_boto = "Reprendre entrenament"
-
-
 
     def guardar_progres(self):
         thread = threading.Thread(target=self.escriure_progress)
@@ -86,7 +87,7 @@ class EntrenarPantalla(Screen):
         with open(f"algorisme{xarxa}.pkl", 'wb') as fitxer:
             pickle.dump((xarxa, iteracions), fitxer)
             self.informacio = "Progrés guardat"
-    
+
     def recuperar_progres(self):
         thread = threading.Thread(target=self.llegir_progress)
         self.informacio = "Llegint"
@@ -105,13 +106,14 @@ class EntrenarPantalla(Screen):
 
     pass
 
+
 class ProvarPantalla(Screen):
     prediccio = StringProperty("Realitza una predicció")
 
     def predieix(self):
         global xarxa
         textura = self.ids.canvas_pintar.export_as_image().texture
-        #textura = self.ids.canvas_pintar.texture
+        # textura = self.ids.canvas_pintar.texture
         tamany = textura.size
         canvas = textura.pixels
         imatge = Image.frombytes(mode='RGBA', size=tamany, data=canvas)
@@ -121,7 +123,8 @@ class ProvarPantalla(Screen):
         amplada, altura = imatge.size
         nou_tamany = np.maximum(amplada, altura)
         imatge_nova = Image.new(imatge.mode, (nou_tamany, nou_tamany), (0))
-        imatge_nova.paste(imatge, box=((nou_tamany - amplada)//2, (nou_tamany - altura)//2))
+        imatge_nova.paste(imatge, box=(
+            (nou_tamany - amplada)//2, (nou_tamany - altura)//2))
         imatge = imatge_nova.resize((20, 20))
         imatge = np.array(imatge)
         imatge = imatge / 255.0
@@ -134,7 +137,6 @@ class ProvarPantalla(Screen):
         print(str(np.max(sortida, 0)))
 
 
-
 class Pintar(Widget):
     def __init__(self, **kwargs):
         super(Pintar, self).__init__(**kwargs)
@@ -143,12 +145,13 @@ class Pintar(Widget):
     lines = []
 
     def on_touch_down(self, touch):
-        with self.canvas:   
+        with self.canvas:
             if self.collide_point(*touch.pos):
                 Color(0, 0, 0)
                 d = 20
-                self.ellipses.append(Ellipse(pos=(touch.x - d / 2, touch.y - d / 2), size=(d, d)))
-                touch.ud['line'] = Line(points=(touch.x, touch.y), width= d / 2)
+                self.ellipses.append(
+                    Ellipse(pos=(touch.x - d / 2, touch.y - d / 2), size=(d, d)))
+                touch.ud['line'] = Line(points=(touch.x, touch.y), width=d / 2)
                 self.lines.append(touch.ud['line'])
 
     def on_touch_move(self, touch):
@@ -158,21 +161,24 @@ class Pintar(Widget):
             with self.canvas:
                 Color(0, 0, 0)
                 d = 20
-                touch.ud['line'] = Line(points=(touch.x, touch.y), width= d / 2)
+                touch.ud['line'] = Line(points=(touch.x, touch.y), width=d / 2)
                 self.lines.append(touch.ud['line'])
+
 
 class MenuPantalla(Screen):
     pass
 
+
 class ReconeixementDigitsApp(App):
-    
+
     def build(self):
         sm = ScreenManager()
         sm.add_widget(MenuPantalla(name='menu'))
         sm.add_widget(EntrenarPantalla(name='entrenar'))
         sm.add_widget(ProvarPantalla(name='provar'))
-        
+
         return sm
+
 
 def main():
     global xarxa
@@ -181,9 +187,9 @@ def main():
         ReLU(),
         MaxPooling(dim_pool=3),
         Aplana(),
-        Perceptró(256, optimitzador='adam'), 
+        Perceptró(256, optimitzador='adam'),
         ReLU(),
-        Perceptró(128, optimitzador='adam'), 
+        Perceptró(128, optimitzador='adam'),
         ReLU(),
         Perceptró(10, optimitzador='adam'),
         Softmax(),
@@ -193,6 +199,7 @@ def main():
     iteracions = 0
 
     ReconeixementDigitsApp().run()
+
 
 if __name__ == '__main__':
     main()
