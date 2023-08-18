@@ -6,7 +6,7 @@ import utils
 class Capa():
     def __init__(self):
         pass
-
+    
     def propaga(self):
         pass
 
@@ -36,10 +36,9 @@ class Perceptró(Capa):
         else:
             self.W, self.b, self.optimitzador = None, None, optimitzadors.text_a_optimitzador(optimitzador, 0, 0)
 
-    
     def propaga(self, entrada):
         if self.W is None:
-            self.W, self.b, self.optimitzador = self.paràmetres_inicials(entrada.shape[0], self.dim_sortida, self.optimitzador)
+            self.W, self.b, self.optimitzador = self.paràmetres_inicials(entrada.shape[0], self.dim_sortida, self.optimitzador_txt)
         self.entrada = entrada
         return self.W.dot(entrada) + self.b
 
@@ -103,45 +102,44 @@ class MaxPooling(Capa):
         return self.__str__()
 
 class Convolució(Capa):
-    def paràmetres_inicials(self, n_kernels, forma_entrada, dim_kernel, optimitzador):
+    def paràmetres_inicials(self, n_kernels, forma_entrada, dim_kernel):
         self.forma_entrada = forma_entrada
         self.forma_sortida = (forma_entrada[1] - dim_kernel + 1, forma_entrada[2] - dim_kernel + 1)
-        kernels = np.random.randn(n_kernels, dim_kernel, dim_kernel, forma_entrada[1])
-        biaix = np.random.randn(*self.forma_sortida, n_kernels)
-        optimitzador = optimitzadors.text_a_optimitzador(optimitzador, self.forma_sortida, forma_entrada)
-        return kernels, biaix, optimitzador
-    def __init__(self, dim_kernel, n_kernels, forma_entrada=None, optimitzador='cap'):
+        W = np.random.randn(n_kernels, dim_kernel, dim_kernel, forma_entrada[1])
+        b = np.random.randn(*self.forma_sortida, n_kernels)
+        return W, b
+    def __init__(self, dim_kernel, n_kernels, forma_entrada=None):
         self.n_kernels = n_kernels
         self.dim_kernel = dim_kernel
-        self.optimitzador = optimitzador
         
-        self.kernels, self.biaix = None, None
+        self.W, self.b = None, None
         if forma_entrada is not None:
-            self.kernels, self.biaix, self.optimitzador = self.paràmetres_inicials(n_kernels, forma_entrada, dim_kernel, optimitzador)
+            self.W, self.b = self.paràmetres_inicials(n_kernels, forma_entrada, dim_kernel)
 
 
     def propaga(self, entrada):
-        if self.kernels is None:
-            self.kernels, self.biaix, self.optimitzador = self.paràmetres_inicials(self.n_kernels, entrada.shape, self.dim_kernel, self.optimitzador)
+        if self.W is None:
+            self.W, self.b = self.paràmetres_inicials(self.n_kernels, entrada.shape, self.dim_kernel)
         self.entrada = entrada
-        sortida = np.zeros((entrada.shape[0], *self.biaix.shape))
+        sortida = np.zeros((entrada.shape[0], *self.b.shape))
         for i in range(entrada.shape[0]):
             for j in range(entrada.shape[-1]):
-                for k in range(self.kernels.shape[0]):
-                    sortida[i,...,k] += correlate2d(entrada[i,...,j], self.kernels[k,...,j], mode='valid') + self.biaix[...,k]
+                for k in range(self.W.shape[0]):
+                    sortida[i,...,k] += correlate2d(entrada[i,...,j], self.W[k,...,j], mode='valid') + self.b[...,k]
 
         return sortida
     
     def retropropaga(self, delta, alfa, iter):
-        dK = np.zeros_like(self.kernels)
+        dK = np.zeros_like(self.W)
         delta_nou = np.zeros(self.forma_entrada)
         for i in range(self.entrada.shape[0]):
             for j in range(self.entrada.shape[-1]):
-                for k in range(self.kernels.shape[0]):
+                for k in range(self.W.shape[0]):
                     dK[k,...,j] += correlate2d(self.entrada[i,...,j], delta[i,...,k], mode='valid')
-                    delta_nou[i,...,j] += convolve2d(delta[i,...,k], self.kernels[k,...,j], mode='full')
+                    delta_nou[i,...,j] += convolve2d(delta[i,...,k], self.W[k,...,j], mode='full')
         
-        self.kernels, self.biaix = self.optimitzador.actualitza(alfa, self.kernels, dK, self.biaix, np.sum(delta), iter)
+        self.W -= alfa * dK
+        self.b -= alfa * np.sum(delta)
     
     def __srt__(self):
         return self.__class__.__name__ + str((self.dim_kernel, self.n_kernels))
