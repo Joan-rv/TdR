@@ -18,7 +18,7 @@ def llegir_dades():
 
     # Obtenir primera columna
     entrenament_digits = entrenament[:, 0]
-    # Obtenir les imatges i processar-les per facilitar les operacions
+    # Obtenir les imatges i normalitzar-les per facilitar les operacions
     entrenament_imatges = normalitza_dades(entrenament[:, 1:])
     prova_imatges = normalitza_dades(prova)
     return entrenament_digits, entrenament_imatges, prova_imatges

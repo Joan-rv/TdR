@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 
 
 def normalitza_dades(dades):
-    return (dades-np.min(dades))/(np.max(dades)-np.min(dades))
+    # Divideix cada valor per el màxim
+    return dades/np.max(dades)
 
 
 def one_hot(Y):

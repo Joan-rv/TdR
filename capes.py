@@ -8,10 +8,10 @@ class Capa():
     def __init__(self):
         pass
 
-    def propaga(self):
+    def propaga(self, entrada):
         pass
 
-    def retropropaga(self):
+    def retropropaga(self, delta, alfa, iteració):
         pass
 
     def __str__(self):
@@ -23,12 +23,16 @@ class Capa():
 
 class Perceptró(Capa):
     def paràmetres_inicials(self, dim_entrada, dim_sortida, optimitzador_txt):
+        # Calcula la desviació estàndard de les mostres
         desviació_estàndard = np.sqrt(2/(dim_entrada + dim_sortida))
+        # Obtèn les mostres d'una distribució normal.
         W = np.random.normal(0, desviació_estàndard,
                              (dim_sortida, dim_entrada))
         b = np.random.normal(0, desviació_estàndard, (dim_sortida, 1))
+        # Obtèn l'optimitzador a partir del text del paràmetre
         optimitzador = optimitzadors.text_a_optimitzador(
             optimitzador_txt, dim_sortida, dim_entrada)
+
         return W, b, optimitzador
 
     def __init__(self, dim_sortida, dim_entrada=None, optimitzador='cap'):
@@ -48,7 +52,7 @@ class Perceptró(Capa):
         self.entrada = entrada
         return self.W.dot(entrada) + self.b
 
-    def retropropaga(self, delta, alfa, iter):
+    def retropropaga(self, delta, alfa, iteració):
         _, m = self.entrada.shape
 
         delta_nou = self.W.T.dot(delta)
@@ -57,7 +61,7 @@ class Perceptró(Capa):
         db = np.reshape(1/m * np.sum(delta, 1), self.b.shape)
 
         self.W, self.b = self.optimitzador.actualitza(
-            alfa, self.W, dW, self.b, db, iter)
+            alfa, self.W, dW, self.b, db, iteració)
 
         return delta_nou
 
@@ -151,7 +155,7 @@ class Convolució(Capa):
 
         return sortida
 
-    def retropropaga(self, delta, alfa, iter):
+    def retropropaga(self, delta, alfa, _):
         dK = np.zeros_like(self.W)
         delta_nou = np.zeros(self.forma_entrada)
         for i in range(self.entrada.shape[0]):
