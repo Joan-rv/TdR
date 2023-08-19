@@ -94,8 +94,10 @@ class MaxPooling(Capa):
         n_entrades, altura, amplada, canals = entrada.shape
         sortida_altura = altura // self.forma[0]
         sortida_amplada = amplada // self.forma[1]
-        blocs = utils.finestres(entrada, self.forma, axis=(-3, -2),
-                                gambades=self.forma).reshape(entrada.shape[0], -1, self.tamany, canals)
+        blocs = np.swapaxes(entrada.reshape(
+            (n_entrades, -1, self.forma[0], sortida_amplada, self.forma[1], canals)), -3, -4).reshape(n_entrades, -1, self.tamany, canals)
+        # blocs = utils.finestres(entrada, self.forma, axis=(-3, -2),
+        #                        gambades=self.forma).reshape(entrada.shape[0], -1, self.tamany, canals)
         sortida = np.max(np.swapaxes(blocs, 2, 3), axis=3).reshape(
             (n_entrades, sortida_altura, sortida_amplada, canals))
         self.index_maxs = np.equal(
