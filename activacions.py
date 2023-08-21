@@ -37,12 +37,24 @@ class ReLU(Activació):
         return (x > 0) * 1
 
 
-class Softmax(Capa):
-    def propaga(self, x):
+class Tanh(Activació):
+    def __init__(self):
+        super().__init__(self.tanh, self.d_tanh)
+
+    def tanh(self, x):
+        return np.tanh(x)
+
+    def d_tanh(self, x):
+        return 1 - np.square(np.tanh(x))
+
+
+class Softmax(Activació):
+    def __init__(self):
+        super().__init__(self.softmax, self.d_softmax)
+
+    def softmax(self, x):
         exp = np.exp(x - np.max(x, axis=0))
         return exp / exp.sum(axis=0)
 
-    def retropropaga(self, delta, *_):
-        return delta
-        # n = np.size(self.sortida)
-        # return ((np.identity(n) - self.sortida.T) * self.sortida).dot(delta)
+    def d_softmax(self, delta, *_):
+        return 1
