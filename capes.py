@@ -144,11 +144,14 @@ class MaxPooling(Capa):
 
 class Convolució(Capa):
     def paràmetres_inicials(self, n_kernels, forma_entrada, dim_kernel):
+        # Guardar les formes
         self.forma_entrada = forma_entrada
         self.forma_sortida = (
             forma_entrada[1] - dim_kernel + 1, forma_entrada[2] - dim_kernel + 1)
+        # Calcular la desviació estàndard
         desviació_estàndard = np.sqrt(
             2/(dim_kernel**2 * forma_entrada[-1] + n_kernels))
+        # Extreure mostres d'una distribució normal
         W = np.random.normal(0, desviació_estàndard, (n_kernels, dim_kernel,
                                                       dim_kernel, forma_entrada[1]))
         b = np.random.normal(0, desviació_estàndard,
@@ -165,11 +168,15 @@ class Convolució(Capa):
                 n_kernels, forma_entrada, dim_kernel)
 
     def propaga(self, entrada):
+        # Si l'entrada era implícita inicialitzar els paràmetres
         if self.W is None:
             self.W, self.b = self.paràmetres_inicials(
                 self.n_kernels, entrada.shape, self.dim_kernel)
+        # Desar-la per la retropropagació
         self.entrada = entrada
+        # La sortida s'ha de crear
         sortida = np.zeros((entrada.shape[0], *self.b.shape))
+        # Aplicar la convolució
         for i in range(entrada.shape[0]):
             for j in range(entrada.shape[-1]):
                 for k in range(self.W.shape[0]):
@@ -179,8 +186,10 @@ class Convolució(Capa):
         return sortida
 
     def retropropaga(self, delta, alfa, _):
+        # Crear variables de sortida
         dK = np.zeros_like(self.W)
         delta_nou = np.zeros(self.forma_entrada)
+        # Aplicar les operacions
         for i in range(self.entrada.shape[0]):
             for j in range(self.entrada.shape[-1]):
                 for k in range(self.W.shape[0]):
@@ -189,6 +198,7 @@ class Convolució(Capa):
                     delta_nou[i, ..., j] += convolve2d(
                         delta[i, ..., k], self.W[k, ..., j], mode='full')
 
+        # Actualitzar els paràmetres
         self.W -= alfa * dK
         self.b -= alfa * np.sum(delta)
 
