@@ -25,11 +25,11 @@ class Perceptró(Capa):
     def paràmetres_inicials(self, dim_entrada, dim_sortida, optimitzador):
         # Calcula la desviació estàndard de les mostres
         desviació_estàndard = np.sqrt(2/(dim_entrada + dim_sortida))
-        # Obtèn les mostres d'una distribució normal.
+        # Obtén les mostres d'una distribució normal.
         W = np.random.normal(0, desviació_estàndard,
                              (dim_sortida, dim_entrada))
         b = np.random.normal(0, desviació_estàndard, (dim_sortida, 1))
-        # Obtèn l'optimitzador a partir del text del paràmetre
+        # Obtén l'optimitzador a partir del text del paràmetre
         optimitzador = optimitzadors.text_a_optimitzador(
             optimitzador, dim_sortida, dim_entrada)
 
@@ -125,11 +125,11 @@ class MaxPooling(Capa):
         return sortida
 
     def retropropaga(self, delta, *_):
-        # Canviar la forma per la multiplicació amb self.índex_maxs
+        # Canviar la forma per fer multiplicació amb self.índex_maxs
         delta = delta.reshape(delta.shape[0], -1, 1, delta.shape[-1])
-        # Assigna a cada gradient a la seva posició en el bloc
+        # Assigna cada gradient a la seva posició en el bloc
         delta_nou = self.índex_mask * delta
-        # Transforma de blocs en imatges
+        # Transforma els blocs en imatges
         delta_nou = delta_nou.reshape((delta.shape[0], -1, self.forma[0], self.entrada_forma[2]//self.forma[1],
                                       self.forma[1], delta.shape[-1])).transpose((0, 1, 3, 2, 4, 5)).reshape(self.entrada_forma)
         # Elimina el farciment i retorna
@@ -147,9 +147,12 @@ class Convolució(Capa):
         self.forma_entrada = forma_entrada
         self.forma_sortida = (
             forma_entrada[1] - dim_kernel + 1, forma_entrada[2] - dim_kernel + 1)
-        W = np.random.randn(n_kernels, dim_kernel,
-                            dim_kernel, forma_entrada[1])
-        b = np.random.randn(*self.forma_sortida, n_kernels)
+        desviació_estàndard = np.sqrt(
+            2/(dim_kernel**2 * forma_entrada[-1] + n_kernels))
+        W = np.random.normal(0, desviació_estàndard, (n_kernels, dim_kernel,
+                                                      dim_kernel, forma_entrada[1]))
+        b = np.random.normal(0, desviació_estàndard,
+                             (*self.forma_sortida, n_kernels))
         return W, b
 
     def __init__(self, dim_kernel, n_kernels, forma_entrada=None):
