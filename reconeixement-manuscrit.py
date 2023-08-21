@@ -19,19 +19,19 @@ kivy.require('1.9.0')
 
 
 class EntrenarPantalla(Screen):
-    informacio = StringProperty("Esperant instruccions")
-    text_boto = StringProperty("Inicar entrenament")
+    informació = StringProperty("Esperant instruccions")
+    text_botó = StringProperty("Inicar entrenament")
     entrenant = BooleanProperty(False)
     no_pot_marxar = BooleanProperty(False)
 
     def processa_entrenar(self):
-        self.text_boto = "Aturant entrenament"
-        self.informacio = "Aturant entrenament"
+        self.text_botó = "Aturant entrenament"
+        self.informació = "Aturant entrenament"
         if self.entrenant:
             self.entrenant = False
         else:
-            self.informacio = "Iniciant entrenament"
-            self.text_boto = "Parar entrenament"
+            self.informació = "Iniciant entrenament"
+            self.text_botó = "Parar entrenament"
             self.entrenant = True
             self.thread_entrenar = threading.Thread(
                 target=self.entrenar, daemon=True)
@@ -39,7 +39,7 @@ class EntrenarPantalla(Screen):
 
     def entrenar(self):
         global xarxa, iteracions
-        self.informacio = "Llegint dades"
+        self.informació = "Llegint dades"
 
         digits, imatges, _ = ia.llegir_dades()
         imatges = imatges.reshape(-1, 28, 28, 1)
@@ -57,7 +57,7 @@ class EntrenarPantalla(Screen):
 
         precisió = 0
         alfa = 0.001
-        self.informacio = "Iniciant entrenament"
+        self.informació = "Iniciant entrenament"
         self.no_pot_marxar = True
         while self.entrenant:
             iteracions += 1
@@ -72,25 +72,25 @@ class EntrenarPantalla(Screen):
 
                 xarxa.retropropaga(alfa, ia.d_eqm, Y_lot, iteracions)
 
-            self.informacio = f"Iteració: {iteracions}, precisió: {precisió*100:.2f}%"
+            self.informació = f"Iteració: {iteracions}, precisió: {precisió*100:.2f}%"
         self.no_pot_marxar = False
-        self.informacio = "Esperant instruccions"
-        self.text_boto = "Reprendre entrenament"
+        self.informació = "Esperant instruccions"
+        self.text_botó = "Reprendre entrenament"
 
     def guardar_progres(self):
         thread = threading.Thread(target=self.escriure_progress)
-        self.informacio = "Escrivint"
+        self.informació = "Escrivint"
         thread.start()
 
     def escriure_progress(self):
         global xarxa, iteracions
         with open(f"algorisme{xarxa}.pkl", 'wb') as fitxer:
             pickle.dump((xarxa, iteracions), fitxer)
-            self.informacio = "Progrés guardat"
+            self.informació = "Progrés guardat"
 
     def recuperar_progres(self):
         thread = threading.Thread(target=self.llegir_progress)
-        self.informacio = "Llegint"
+        self.informació = "Llegint"
         thread.start()
 
     def llegir_progress(self):
@@ -99,18 +99,18 @@ class EntrenarPantalla(Screen):
             print(xarxa)
             with open(f"algorisme{xarxa}.pkl", 'rb') as fitxer:
                 xarxa, iteracions = pickle.load(fitxer)
-                self.informacio = "Progrés recuperat"
+                self.informació = "Progrés recuperat"
         except FileNotFoundError:
-            self.informacio = "Error, no s'ha trobat el fitxer"
+            self.informació = "Error, no s'ha trobat el fitxer"
             pass
 
     pass
 
 
 class ProvarPantalla(Screen):
-    prediccio = StringProperty("Realitza una predicció")
+    predicció = StringProperty("Realitza una predicció")
 
-    def predieix(self):
+    def prediu(self):
         global xarxa
         textura = self.ids.canvas_pintar.export_as_image().texture
         # textura = self.ids.canvas_pintar.texture
@@ -132,7 +132,7 @@ class ProvarPantalla(Screen):
         imatge = imatge.reshape(1, 28, 28, 1)
 
         sortida = xarxa.propaga(imatge)
-        self.prediccio = f"Predicció: {np.argmax(sortida, 0)[0]} | Confiança: {np.max(sortida, 0)[0]*100:.2f}%"
+        self.predicció = f"Predicció: {np.argmax(sortida, 0)[0]} | Confiança: {np.max(sortida, 0)[0]*100:.2f}%"
         print(str(np.argmax(sortida, 0)))
         print(str(np.max(sortida, 0)))
 

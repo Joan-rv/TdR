@@ -22,7 +22,7 @@ class Capa():
 
 
 class Perceptró(Capa):
-    def paràmetres_inicials(self, dim_entrada, dim_sortida, optimitzador_txt):
+    def paràmetres_inicials(self, dim_entrada, dim_sortida, optimitzador):
         # Calcula la desviació estàndard de les mostres
         desviació_estàndard = np.sqrt(2/(dim_entrada + dim_sortida))
         # Obtèn les mostres d'una distribució normal.
@@ -31,7 +31,7 @@ class Perceptró(Capa):
         b = np.random.normal(0, desviació_estàndard, (dim_sortida, 1))
         # Obtèn l'optimitzador a partir del text del paràmetre
         optimitzador = optimitzadors.text_a_optimitzador(
-            optimitzador_txt, dim_sortida, dim_entrada)
+            optimitzador, dim_sortida, dim_entrada)
 
         return W, b, optimitzador
 
@@ -46,20 +46,28 @@ class Perceptró(Capa):
                 optimitzador, 0, 0)
 
     def propaga(self, entrada):
+        # Si dim_entrada era implícit s'ha d'inferir i inicialitzar els
+        # paràmetres
         if self.W is None:
             self.W, self.b, self.optimitzador = self.paràmetres_inicials(
                 entrada.shape[0], self.dim_sortida, self.optimitzador_txt)
+        # Guardar entrada per la retropropagació
         self.entrada = entrada
+        # Aplicar la propagació
         return self.W.dot(entrada) + self.b
 
     def retropropaga(self, delta, alfa, iteració):
+        # obtenir nombre d'entrades
         _, m = self.entrada.shape
 
+        # calcular el nou gradient
         delta_nou = self.W.T.dot(delta)
 
+        # calcular les derivades parcials
         dW = 1/m * delta.dot(self.entrada.T)
         db = np.reshape(1/m * np.sum(delta, 1), self.b.shape)
 
+        # actualitzar els paràmetres
         self.W, self.b = self.optimitzador.actualitza(
             alfa, self.W, dW, self.b, db, iteració)
 
@@ -77,10 +85,13 @@ class Aplana(Capa):
         pass
 
     def propaga(self, entrada):
+        # Emmagatzemar forma
         self.forma = entrada.shape
+        # Canviar forma
         return entrada.reshape(entrada.shape[0], -1).T
 
     def retropropaga(self, delta, *_):
+        # Recuperar forma
         return delta.reshape(self.forma)
 
 
@@ -90,29 +101,38 @@ class MaxPooling(Capa):
         self.tamany = dim_pool**2
 
     def propaga(self, entrada):
+        # Es necessita la forma per la retropropagació
         self.entrada_forma_vell = entrada.shape
+        # Si l'entrada no és divisible pels blocs, es farceix fins que ho és
         if entrada.shape[1] % self.forma[0] != 0 or entrada.shape[2] % self.forma[1] != 0:
             entrada = np.pad(entrada, ((0, 0), (0, self.forma[0] - entrada.shape[1] % self.forma[0]),
                                        (0, self.forma[1] - entrada.shape[2] % self.forma[1]), (0, 0)), constant_values=-np.inf)
+        # També es necessita per la retropropagació
         self.entrada_forma = entrada.shape
+        # Definir variables
         n_entrades, altura, amplada, canals = entrada.shape
         sortida_altura = altura // self.forma[0]
         sortida_amplada = amplada // self.forma[1]
+        # Es transformen les imatges en els blocs
         blocs = np.swapaxes(entrada.reshape(
             (n_entrades, -1, self.forma[0], sortida_amplada, self.forma[1], canals)), -3, -4).reshape(n_entrades, -1, self.tamany, canals)
-        # blocs = utils.finestres(entrada, self.forma, axis=(-3, -2),
-        #                        gambades=self.forma).reshape(entrada.shape[0], -1, self.tamany, canals)
+        # S'obté el màxim de cada bloc
         sortida = np.max(np.swapaxes(blocs, 2, 3), axis=3).reshape(
             (n_entrades, sortida_altura, sortida_amplada, canals))
-        self.index_maxs = np.equal(
+        # Desar la posició dels valors màxims per a la retropropagació
+        self.índex_mask = np.equal(
             blocs, sortida.reshape(n_entrades, -1, 1, canals))
         return sortida
 
     def retropropaga(self, delta, *_):
+        # Canviar la forma per la multiplicació amb self.índex_maxs
         delta = delta.reshape(delta.shape[0], -1, 1, delta.shape[-1])
-        delta_nou = self.index_maxs * delta
+        # Assigna a cada gradient a la seva posició en el bloc
+        delta_nou = self.índex_mask * delta
+        # Transforma de blocs en imatges
         delta_nou = delta_nou.reshape((delta.shape[0], -1, self.forma[0], self.entrada_forma[2]//self.forma[1],
                                       self.forma[1], delta.shape[-1])).transpose((0, 1, 3, 2, 4, 5)).reshape(self.entrada_forma)
+        # Elimina el farciment i retorna
         return delta_nou[..., 0:self.entrada_forma_vell[1], 0:self.entrada_forma_vell[2], :]
 
     def __str__(self):

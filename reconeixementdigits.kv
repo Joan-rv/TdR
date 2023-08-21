@@ -30,12 +30,12 @@ MenuPantalla:
         BoxLayout:
             orientation: "horizontal"
             Label:
-                text: root.informacio
+                text: root.informació
             BoxLayout:
                 orientation: "vertical"
                 Button:
                     size_hint: 1, 2
-                    text: root.text_boto
+                    text: root.text_botó
                     on_press: root.processa_entrenar()
                 BoxLayout:
                     orientation: "horizontal"
@@ -67,7 +67,7 @@ MenuPantalla:
                     Rectangle:
                         size: self.size
         Label:
-            text: root.prediccio
+            text: root.predicció
         BoxLayout:
             orientation: "horizontal"
             spacing: "20dp"
@@ -78,7 +78,7 @@ MenuPantalla:
             Button:
                 size_hint: .2, 1
                 text: "Fer predicció"
-                on_press: root.predieix()
+                on_press: root.prediu()
 
 <BoxLayout>:
     spacing: "5dp"
