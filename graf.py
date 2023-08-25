@@ -41,7 +41,7 @@ plt.legend()
 plt.savefig('Gràfica_sig_tanh.svg', bbox_inches='tight')
 
 xarxa = XarxaNeuronal([
-    Perceptró(1, 1),
+    Perceptró(1),
 ])
 
 X = np.array([[0], [1]]).T
@@ -110,10 +110,9 @@ def graficà_3d_model(model, nom_fitxer_sortida):
 
 
 xarxa = XarxaNeuronal([
-    Perceptró(2, 2),
+    Perceptró(2),
     Sigmoide(),
-    Perceptró(2, 1),
-    # Escalonada(),
+    Perceptró(1),
 ])
 
 X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]]).T
@@ -136,7 +135,7 @@ print(f"Iteració: {i}; precisió: {precisió_entrenament*100:.2f}%")
 graficà_3d_model(xarxa, 'Gràfica_xor.svg')
 
 xarxa = XarxaNeuronal([
-    Perceptró(2, 1),
+    Perceptró(1),
 ])
 
 X = np.array([[0, 0], [0, 1], [1, 0], [1, 1]]).T
