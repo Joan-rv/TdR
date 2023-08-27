@@ -18,19 +18,19 @@ kivy.require('1.9.0')
 
 
 class EntrenarPantalla(Screen):
-    informació = StringProperty("Esperant instruccions")
-    text_botó = StringProperty("Inicar entrenament")
+    informacio = StringProperty("Esperant instruccions")
+    text_boto = StringProperty("Inicar entrenament")
     entrenant = BooleanProperty(False)
     no_pot_marxar = BooleanProperty(False)
 
     def processa_entrenar(self):
-        self.text_botó = "Aturant entrenament"
-        self.informació = "Aturant entrenament"
+        self.text_boto = "Aturant entrenament"
+        self.informacio = "Aturant entrenament"
         if self.entrenant:
             self.entrenant = False
         else:
-            self.informació = "Iniciant entrenament"
-            self.text_botó = "Parar entrenament"
+            self.informacio = "Iniciant entrenament"
+            self.text_boto = "Parar entrenament"
             self.entrenant = True
             self.thread_entrenar = threading.Thread(
                 target=self.entrenar, daemon=True)
@@ -38,7 +38,7 @@ class EntrenarPantalla(Screen):
 
     def entrenar(self):
         global xarxa, iteracions
-        self.informació = "Llegint dades"
+        self.informacio = "Llegint dades"
 
         digits, imatges, _ = ia.llegir_dades()
         imatges = imatges.reshape(-1, 28, 28, 1)
@@ -56,7 +56,7 @@ class EntrenarPantalla(Screen):
 
         precisió = 0
         alfa = 0.001
-        self.informació = "Iniciant entrenament"
+        self.informacio = "Iniciant entrenament"
         self.no_pot_marxar = True
         while self.entrenant:
             iteracions += 1
@@ -71,25 +71,25 @@ class EntrenarPantalla(Screen):
 
                 xarxa.retropropaga(alfa, ia.d_eqm, Y_lot, iteracions)
 
-            self.informació = f"Iteració: {iteracions}, precisió: {precisió*100:.2f}%"
+            self.informacio = f"Iteració: {iteracions}, precisió: {precisió*100:.2f}%"
         self.no_pot_marxar = False
-        self.informació = "Esperant instruccions"
-        self.text_botó = "Reprendre entrenament"
+        self.informacio = "Esperant instruccions"
+        self.text_boto = "Reprendre entrenament"
 
     def guardar_progres(self):
         thread = threading.Thread(target=self.escriure_progress)
-        self.informació = "Escrivint"
+        self.informacio = "Escrivint"
         thread.start()
 
     def escriure_progress(self):
         global xarxa, iteracions
         with open(f"algorisme{xarxa}.pkl", 'wb') as fitxer:
             pickle.dump((xarxa, iteracions), fitxer)
-            self.informació = "Progrés guardat"
+            self.informacio = "Progrés guardat"
 
     def recuperar_progres(self):
         thread = threading.Thread(target=self.llegir_progress)
-        self.informació = "Llegint"
+        self.informacio = "Llegint"
         thread.start()
 
     def llegir_progress(self):
@@ -98,9 +98,9 @@ class EntrenarPantalla(Screen):
             print(xarxa)
             with open(f"algorisme{xarxa}.pkl", 'rb') as fitxer:
                 xarxa, iteracions = pickle.load(fitxer)
-                self.informació = "Progrés recuperat"
+                self.informacio = "Progrés recuperat"
         except FileNotFoundError:
-            self.informació = "Error, no s'ha trobat el fitxer"
+            self.informacio = "Error, no s'ha trobat el fitxer"
             pass
 
     pass
