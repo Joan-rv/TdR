@@ -6,51 +6,64 @@ MenuPantalla:
         orientation: "vertical"
         Button:
             text: "Entrenar intel·ligència"
+            font_size: "30sp"
             on_press:
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'entrenar'
         Button:
             text: "Provar intel·ligència"
+            font_size: "30sp"
             on_press: 
                 root.manager.transition.direction = 'left'
                 root.manager.current = 'provar'
-        Button:
-            text: "Proporcionar dades"
 
 <EntrenarPantalla>:
     BoxLayout:
         orientation: "vertical"
         Button:
-            size_hint: 0.1, 0.1
+            size_hint: None, None
+            size: dp(80), dp(40)
             text: "Enrere"
             disabled: root.no_pot_marxar
             on_press:
                 root.manager.transition.direction = 'right'
                 root.manager.current = 'menu'
         BoxLayout:
-            orientation: "horizontal"
-            Label:
-                text: root.informacio
+            orientation: "vertical"
             BoxLayout:
-                orientation: "vertical"
-                Button:
-                    size_hint: 1, 2
-                    text: root.text_boto
-                    on_press: root.processa_entrenar()
+                size_hint: 1, 1.75
+                orientation: "horizontal"
+                Label:
+                    text: root.informacio
+                    font_size: "25sp"
+                    halign: "center"
                 BoxLayout:
-                    orientation: "horizontal"
+                    size_hint: 0.4, 1
+                    orientation: "vertical"
                     Button:
-                        text: "Guardar progrés"
-                        on_press: root.guardar_progres()
-                    Button:
-                        text: "Recuperar progrés"
-                        on_press: root.recuperar_progres()
+                        size_hint: 1, 2
+                        text: root.text_boto
+                        font_size: "20sp"
+                        on_press: root.processa_entrenar()
+            BoxLayout:
+                orientation: "horizontal"
+                Button:
+                    text: "Guardar progrés"
+                    font_size: "20sp"
+                    on_press: root.guardar_progres()
+                    disabled: root.no_pot_marxar
+                Button:
+                    text: "Recuperar progrés"
+                    font_size: "20sp"
+                    on_press: root.recuperar_progres()
+                    disabled: root.no_pot_marxar
 
 <ProvarPantalla>:
     BoxLayout:
         orientation: "vertical"
         Button:
-            size_hint: 0.1, 0.1
+            size_hint: None, None
+            size: dp(80), dp(40)
             text: "Enrere"
             on_press:
                 root.manager.transition.direction = 'right'
@@ -67,17 +80,20 @@ MenuPantalla:
                     Rectangle:
                         size: self.size
         Label:
-            text: root.predicció
+            text: root.prediccio
+            font_size: "30sp"
         BoxLayout:
             orientation: "horizontal"
             spacing: "20dp"
             Button:
                 size_hint: .2, 1
                 text: "Borrar"
+                font_size: "20sp"
                 on_press: canvas_pintar.canvas.clear()
             Button:
                 size_hint: .2, 1
                 text: "Fer predicció"
+                font_size: "20sp"
                 on_press: root.prediu()
 
 <BoxLayout>:

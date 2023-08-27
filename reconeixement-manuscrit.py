@@ -24,9 +24,9 @@ class EntrenarPantalla(Screen):
     no_pot_marxar = BooleanProperty(False)
 
     def processa_entrenar(self):
-        self.text_boto = "Aturant entrenament"
-        self.informacio = "Aturant entrenament"
         if self.entrenant:
+            self.text_boto = "Aturant entrenament"
+            self.informacio = "Aturant entrenament"
             self.entrenant = False
         else:
             self.informacio = "Iniciant entrenament"
@@ -57,21 +57,30 @@ class EntrenarPantalla(Screen):
         precisió = 0
         alfa = 0.001
         self.informacio = "Iniciant entrenament"
+        informacio_txt = self.informacio
         self.no_pot_marxar = True
         while self.entrenant:
             iteracions += 1
 
             precisió = 0
-            for X_lot, Y_lot in zip(X_lots, Y_lots):
+            error = 0
+            for i, (X_lot, Y_lot) in enumerate(zip(X_lots, Y_lots)):
+                precisió_lot = 0
+                error_lot = 0
                 if not self.entrenant:
                     break
                 sortida = xarxa.propaga(X_lot)
+                precisió_lot = np.sum(np.argmax(sortida, 0) ==
+                                      np.argmax(Y_lot, 0))/Y_lot.shape[1]
+                error_lot = ia.eqm(Y_lot, sortida)/Y_lot.shape[1]
                 precisió += np.sum(np.argmax(sortida, 0) ==
                                    np.argmax(Y_lot, 0))/Y.shape[1]
+                error += ia.eqm(Y_lot, sortida)/Y.shape[1]
 
                 xarxa.retropropaga(alfa, ia.d_eqm, Y_lot, iteracions)
 
-            self.informacio = f"Iteració: {iteracions}, precisió: {precisió*100:.2f}%"
+                self.informacio = f"{informacio_txt}\nLot: {i} de {len(X_lots)}, precisió: {precisió_lot*100:.2f}%, error: {error_lot:.2E}"
+            informacio_txt = f"Iteració: {iteracions}, precisió: {precisió*100:.2f}%, error: {error:.2f}"
         self.no_pot_marxar = False
         self.informacio = "Esperant instruccions"
         self.text_boto = "Reprendre entrenament"
@@ -107,7 +116,7 @@ class EntrenarPantalla(Screen):
 
 
 class ProvarPantalla(Screen):
-    predicció = StringProperty("Realitza una predicció")
+    prediccio = StringProperty("Realitza una predicció")
 
     def prediu(self):
         global xarxa
@@ -131,7 +140,7 @@ class ProvarPantalla(Screen):
         imatge = imatge.reshape(1, 28, 28, 1)
 
         sortida = xarxa.propaga(imatge)
-        self.predicció = f"Predicció: {np.argmax(sortida, 0)[0]} | Confiança: {np.max(sortida, 0)[0]*100:.2f}%"
+        self.prediccio = f"Predicció: {np.argmax(sortida, 0)[0]} | Confiança: {np.max(sortida, 0)[0]*100:.2f}%"
         print(str(np.argmax(sortida, 0)))
         print(str(np.max(sortida, 0)))
 
