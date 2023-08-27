@@ -4,38 +4,36 @@ from matplotlib import colors
 import numpy as np
 
 
-def eixos(ax):
+def prepara_graf_2d():
+    fig, ax = plt.subplots()
+    ax.axhline(0, color='black', linewidth=.5)
+    ax.axvline(0, color='black', linewidth=.5)
+    ax.set_aspect('equal')
     ax.margins(x=0)
-    ax.set_xlim()
     ax.grid(True, which='both')
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
     ax.spines['left'].set_visible(True)
     ax.spines['bottom'].set_visible(True)
+    return fig, ax
 
 
 def sigmoide(x):
     return 1/(1 + np.exp(-x))
 
 
+# Generar 100 mostres entre -2 i 2
 x = np.linspace(-2, 2, 100)
-fig, ax = plt.subplots()
-ax.axhline(0, color='black', linewidth=.5)
-ax.axvline(0, color='black', linewidth=.5)
+fig, ax = prepara_graf_2d()
 ax.plot(x, np.maximum(0, x), label='Sigmoide')
 ax.set_aspect('equal')
 
-eixos(ax)
 
 plt.savefig('Gràfica_relu.svg', bbox_inches='tight')
 
-fig, ax = plt.subplots()
-ax.axhline(0, color='black', linewidth=.5)
-ax.axvline(0, color='black', linewidth=.5)
+fig, ax = prepara_graf_2d()
 ax.plot(x, sigmoide(x), label='Sigmoide')
 ax.plot(x, np.tanh(x), label='Tanh')
-ax.set_aspect('equal')
-eixos(ax)
 
 plt.legend()
 plt.savefig('Gràfica_sig_tanh.svg', bbox_inches='tight')
@@ -64,13 +62,11 @@ print(f"Iteració: {i}; precisió: {precisió_entrenament*100:.2f}%")
 
 x = np.linspace(-1, 1, 100).reshape((1, 100))
 
-fig, ax = plt.subplots()
-ax.axhline(0, color='black', linewidth=.5)
-ax.axvline(0, color='black', linewidth=.5)
+fig, ax = prepara_graf_2d()
 ax.plot(x.T, xarxa.propaga(x).T)
 
-eixos(ax)
 
+# Barres de color per indicar activació o no
 ax.axhspan(0, ax.get_ylim()[1], facecolor='g', alpha=0.1)
 ax.axhspan(0, ax.get_ylim()[0], facecolor='r', alpha=0.1)
 
@@ -80,7 +76,7 @@ ax.set_ylabel("Sortida")
 plt.savefig('Gràfica_recta_not.svg', bbox_inches='tight')
 
 
-def graficà_3d_model(model, nom_fitxer_sortida):
+def graf_3d_model(model, nom_fitxer_sortida):
 
     x = np.linspace(0, 1, 101)
     y = np.linspace(0, 1, 101)
@@ -132,7 +128,7 @@ while precisió_entrenament < 0.99:
 
 print(f"Iteració: {i}; precisió: {precisió_entrenament*100:.2f}%")
 
-graficà_3d_model(xarxa, 'Gràfica_xor.svg')
+graf_3d_model(xarxa, 'Gràfica_xor.svg')
 
 xarxa = XarxaNeuronal([
     Perceptró(1),
@@ -152,5 +148,6 @@ while precisió_entrenament < 0.99:
     precisió_entrenament = np.sum(2*(sortida > 0) - 1 == Y)/Y.shape[1]
     if i % 10 == 0:
         print(f"Iteració: {i}; precisió: {precisió_entrenament*100:.2f}%")
+    print(f"Iteració: {i}; precisió: {precisió_entrenament*100:.2f}%")
 
-graficà_3d_model(xarxa, 'Gràfica_pla_and.svg')
+graf_3d_model(xarxa, 'Gràfica_pla_and.svg')
