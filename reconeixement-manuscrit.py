@@ -1,5 +1,5 @@
-import IA as ia
-from IA import Perceptró, Aplana, MaxPooling, Convolució, Sigmoide, ReLU, Softmax
+import ia
+from model import xarxa
 import threading
 import numpy as np
 import pickle
@@ -13,8 +13,11 @@ from kivy.graphics import Color, Ellipse, Line
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import StringProperty, BooleanProperty
 from PIL import Image, ImageOps
+from kivy.config import Config
 
 kivy.require('1.9.0')
+Config.set('graphics', 'width', '1000')
+Config.set('graphics', 'height', '600')
 
 
 class EntrenarPantalla(Screen):
@@ -40,11 +43,11 @@ class EntrenarPantalla(Screen):
         global xarxa, iteracions
         self.informacio = "Llegint dades"
 
-        digits, imatges, _ = ia.llegir_dades()
+        digits, imatges, _ = ia.utils.llegir_dades()
         imatges = imatges.reshape(-1, 28, 28, 1)
 
         X, X_prova = np.split(imatges, [40000])
-        Y, Y_prova = np.split(ia.one_hot(digits), [40000], axis=1)
+        Y, Y_prova = np.split(ia.utils.one_hot(digits), [40000], axis=1)
 
         temp = np.random.permutation(len(X))
         X = X[temp]
@@ -54,13 +57,14 @@ class EntrenarPantalla(Screen):
         X_lots = np.split(X, X.shape[0]/tamany_lots)
         Y_lots = np.split(Y, Y.shape[1]/tamany_lots, axis=1)
 
-        precisió = 0
         alfa = 0.001
         self.informacio = "Iniciant entrenament"
         informacio_txt = self.informacio
         self.no_pot_marxar = True
+        precisió = float("nan")
+        error = float("nan")
         while self.entrenant:
-            iteracions += 1
+            informacio_txt = f"Iteració: {iteracions}, precisió: {precisió*100:.2f}%, error: {error:.2E}"
 
             precisió = 0
             error = 0
@@ -72,18 +76,18 @@ class EntrenarPantalla(Screen):
                 sortida = xarxa.propaga(X_lot)
                 precisió_lot = np.sum(np.argmax(sortida, 0) ==
                                       np.argmax(Y_lot, 0))/Y_lot.shape[1]
-                error_lot = ia.eqm(Y_lot, sortida)/Y_lot.shape[1]
+                error_lot = ia.errors.eqm(Y_lot, sortida)/Y_lot.shape[1]
                 precisió += np.sum(np.argmax(sortida, 0) ==
                                    np.argmax(Y_lot, 0))/Y.shape[1]
-                error += ia.eqm(Y_lot, sortida)/Y.shape[1]
+                error += ia.errors.eqm(Y_lot, sortida)/Y.shape[1]
 
-                xarxa.retropropaga(alfa, ia.d_eqm, Y_lot, iteracions)
+                xarxa.retropropaga(alfa, ia.errors.d_eqm, Y_lot, iteracions)
 
                 self.informacio = f"{informacio_txt}\nLot: {i} de {len(X_lots)}, precisió: {precisió_lot*100:.2f}%, error: {error_lot:.2E}"
-            informacio_txt = f"Iteració: {iteracions}, precisió: {precisió*100:.2f}%, error: {error:.2f}"
+            iteracions += 1
         self.no_pot_marxar = False
         self.informacio = "Esperant instruccions"
-        self.text_boto = "Reprendre entrenament"
+        self.text_boto = "Continuar entrenant"
 
     def guardar_progres(self):
         thread = threading.Thread(target=self.escriure_progress)
@@ -189,22 +193,8 @@ class ReconeixementDigitsApp(App):
 
 
 def main():
-    global xarxa
-    xarxa = ia.XarxaNeuronal([
-        Convolució(3, 32),
-        ReLU(),
-        MaxPooling(dim_pool=3),
-        Aplana(),
-        Perceptró(256, optimitzador='adam'),
-        ReLU(),
-        Perceptró(128, optimitzador='adam'),
-        ReLU(),
-        Perceptró(10, optimitzador='adam'),
-        Softmax(),
-    ])
-
     global iteracions
-    iteracions = 0
+    iteracions = 1
 
     ReconeixementDigitsApp().run()
 

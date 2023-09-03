@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.signal import convolve2d, correlate2d
-import optimitzadors
-import utils
+from . import optimitzadors
 
 
 class Capa():

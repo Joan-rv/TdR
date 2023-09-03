@@ -1,18 +1,24 @@
 import numpy as np
+import os
 import matplotlib.pyplot as plt
-import IA as ia
-from errors import eqm, d_eqm, eam, d_eam, eqlm, d_eqlm, entropia_creuada, d_entropia_creuada
-from activacions import Sigmoide, Tanh, ReLU, Softmax
-from capes import Perceptró, Aplana
-from xarxa_neuronal import XarxaNeuronal
+import ia.utils
+from ia.errors import eqm, d_eqm, eam, d_eam, eqlm, d_eqlm, entropia_creuada, d_entropia_creuada
+from ia.activacions import Sigmoide, Tanh, ReLU, Softmax
+from ia.capes import Perceptró, Aplana
+from ia.xarxa_neuronal import XarxaNeuronal
+
+
+def camí(nom):
+    return os.path.join("grafs", nom)
+
 
 tamany_lots = 100
 # Llegir dades i crear lots
-digits, imatges, _ = ia.llegir_dades()
+digits, imatges, _ = ia.utils.llegir_dades()
 imatges = np.reshape(imatges, (-1, 28, 28, 1))
 
 X, X_prova = np.split(imatges, [40000])
-Y, Y_prova = np.split(ia.one_hot(digits), [40000], axis=1)
+Y, Y_prova = np.split(ia.utils.one_hot(digits), [40000], axis=1)
 
 X_lots = np.split(X, X.shape[0]/tamany_lots)
 Y_lots = np.split(Y, Y.shape[1]/tamany_lots, axis=1)
@@ -69,7 +75,7 @@ def graf_activacions():
     ax1.legend()
     ax2.set_title("Error")
     ax2.legend()
-    plt.savefig("Gràfica_activacions.svg", bbox_inches='tight')
+    plt.savefig(camí("Gràfica_activacions.svg"), bbox_inches='tight')
 
 
 def graf_errors():
@@ -95,7 +101,7 @@ def graf_errors():
     ax2.set_title("Error")
     ax2.legend()
     plt.tight_layout()
-    plt.savefig("Gràfica_errors.svg", bbox_inches='tight')
+    plt.savefig(camí("Gràfica_errors.svg"), bbox_inches='tight')
 
 
 if __name__ == '__main__':

@@ -1,7 +1,15 @@
-from IA import XarxaNeuronal, Perceptró, Sigmoide, ReLU, d_eqm
+from ia.xarxa_neuronal import XarxaNeuronal
+from ia.capes import Perceptró
+from ia.activacions import Sigmoide
+from ia.errors import d_eqm
 from matplotlib import pyplot as plt
 from matplotlib import colors
 import numpy as np
+import os
+
+
+def camí(nom):
+    return os.path.join("grafs", nom)
 
 
 def prepara_graf_2d():
@@ -29,14 +37,14 @@ ax.plot(x, np.maximum(0, x), label='Sigmoide')
 ax.set_aspect('equal')
 
 
-plt.savefig('Gràfica_relu.svg', bbox_inches='tight')
+plt.savefig(camí('Gràfica_relu.svg'), bbox_inches='tight')
 
 fig, ax = prepara_graf_2d()
 ax.plot(x, sigmoide(x), label='Sigmoide')
 ax.plot(x, np.tanh(x), label='Tanh')
 
 plt.legend()
-plt.savefig('Gràfica_sig_tanh.svg', bbox_inches='tight')
+plt.savefig(camí('Gràfica_sig_tanh.svg'), bbox_inches='tight')
 
 xarxa = XarxaNeuronal([
     Perceptró(1),
@@ -73,7 +81,7 @@ ax.axhspan(0, ax.get_ylim()[0], facecolor='r', alpha=0.1)
 ax.set_xlabel("Entrada")
 ax.set_ylabel("Sortida")
 
-plt.savefig('Gràfica_recta_not.svg', bbox_inches='tight')
+plt.savefig(camí('Gràfica_recta_not.svg'), bbox_inches='tight')
 
 
 def graf_3d_model(model, nom_fitxer_sortida):
@@ -102,7 +110,7 @@ def graf_3d_model(model, nom_fitxer_sortida):
     ax.set_ylabel("$x_2$")
     ax.set_zlabel("$y$")
 
-    plt.savefig(nom_fitxer_sortida, bbox_inches='tight')
+    plt.savefig(camí(nom_fitxer_sortida), bbox_inches='tight')
 
 
 xarxa = XarxaNeuronal([
@@ -151,3 +159,53 @@ while precisió_entrenament < 0.99:
     print(f"Iteració: {i}; precisió: {precisió_entrenament*100:.2f}%")
 
 graf_3d_model(xarxa, 'Gràfica_pla_and.svg')
+
+
+def graf_descens_grad():
+    def f(x1, x2):
+        return (1/2)*x1**2 + (5/3)*x2**2 - x1*x2 - 2*(x1 + x2)
+
+    def grad(x1, x2):
+        return np.array([x1 - x2 - 2, (10/3)*x2 - x1 - 2])
+
+    def magnitud(x):
+        # Fer pitàgores per obtenir magnitud
+        return np.sqrt(np.sum(np.square(x)))
+
+    x1, x2, = -2, -3/2
+    x1s = [x1]
+    x2s = [x2]
+    grad_f = grad(x1, x2)
+
+    while 50 > magnitud(grad_f) > 1e-6:
+        x1 -= alfa * grad_f[0]
+        x2 -= alfa * grad_f[1]
+        x1s.append(x1)
+        x2s.append(x2)
+        grad_f = grad(x1, x2)
+
+    x1 = np.linspace(min(x1s)-1, max(x1s)+1, 200)
+    x2 = np.linspace(min(x2s)-1, max(x2s)+1, 200)
+    X, Y = np.meshgrid(x1, x2)
+    Z = f(X, Y)
+
+    fig = plt.figure()
+
+    plt.imshow(Z, extent=[min(x1s)-1, max(x1s)+1, min(x2s) -
+                          1, max(x2s)+1], origin='lower', cmap='jet')
+    plt.plot(x1s, x2s)
+    plt.plot(x1s, x2s, '*')
+    plt.colorbar()
+
+
+alfa = 0.2
+graf_descens_grad()
+plt.savefig(camí("Gràfica_descens_grad.svg"), bbox_inches='tight')
+
+alfa = 1
+graf_descens_grad()
+plt.savefig(camí("Gràfica_salts_grad.svg"), bbox_inches='tight')
+
+alfa = 0.001
+graf_descens_grad()
+plt.savefig(camí("Gràfica_descens_lent.svg"), bbox_inches='tight')

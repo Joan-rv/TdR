@@ -1,5 +1,7 @@
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+import os
 
 
 def normalitza_dades(dades):
@@ -30,3 +32,19 @@ def finestres(a, forma_finestres, axis=None, gambades=None):
     talls = [slice(None, None, gambada) for gambada in gambades]
     talls += [slice(None, None, None) for _ in range((len(axis) + axis_max))]
     return a[..., *talls]
+
+
+def llegir_dades():
+    # Llegir CSV i guardar en variables
+    entrenament = pd.read_csv(os.path.join("dades", "train.csv")).to_numpy()
+    prova = pd.read_csv(os.path.join("dades", "test.csv")).to_numpy()
+
+    # Ordre aleatori
+    np.random.shuffle(entrenament)
+
+    # Obtenir primera columna
+    entrenament_digits = entrenament[:, 0]
+    # Obtenir les imatges i normalitzar-les per facilitar les operacions
+    entrenament_imatges = normalitza_dades(entrenament[:, 1:])
+    prova_imatges = normalitza_dades(prova)
+    return entrenament_digits, entrenament_imatges, prova_imatges

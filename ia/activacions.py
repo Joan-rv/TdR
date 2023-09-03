@@ -1,5 +1,5 @@
 import numpy as np
-from capes import Capa
+from .capes import Capa
 
 
 class Activació(Capa):
