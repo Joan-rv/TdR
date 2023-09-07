@@ -94,7 +94,7 @@ class Aplana(Capa):
         return delta.reshape(self.forma)
 
 
-class MaxPooling(Capa):
+class MostreigMax(Capa):
     def __init__(self, dim_pool=2):
         self.forma = (dim_pool, dim_pool)
         self.tamany = dim_pool**2

@@ -1,4 +1,4 @@
-from ia.capes import Perceptró, Convolució, MaxPooling, Aplana
+from ia.capes import Perceptró, Convolució, MostreigMax, Aplana
 from ia.activacions import ReLU, Softmax
 from ia.errors import eqm, d_eqm
 import ia.utils as utils
@@ -13,7 +13,7 @@ def main():
     xarxa = XarxaNeuronal([
         Convolució(3, 16),
         ReLU(),
-        MaxPooling(2),
+        MostreigMax(2),
         Aplana(),
         Perceptró(256, optimitzador='adam'),
         ReLU(),
