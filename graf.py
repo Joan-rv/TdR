@@ -2,9 +2,11 @@ from ia.xarxa_neuronal import XarxaNeuronal
 from ia.capes import Perceptró
 from ia.activacions import Sigmoide
 from ia.errors import d_eqm
+from ia.utils import llegir_dades
 from matplotlib import pyplot as plt
 from matplotlib import colors
 import numpy as np
+from scipy.signal import convolve2d
 import os
 
 
@@ -28,6 +30,30 @@ def prepara_graf_2d():
 
 def sigmoide(x):
     return 1/(1 + np.exp(-x))
+
+
+fig, (ax1, ax2) = plt.subplots(1, 2, gridspec_kw={'width_ratios': [1, 2]})
+dim_fig = 3
+x = np.arange(dim_fig**2).reshape(dim_fig, dim_fig)
+ax1.imshow(x, cmap='plasma')
+ax2.imshow(x.reshape(1, dim_fig**2), cmap='plasma')
+ax1.axis("off")
+ax1.set_title("$X$")
+ax2.axis("off")
+ax2.set_title("$A$")
+plt.savefig(camí("Figura_aplanar.svg"), bbox_inches='tight')
+
+
+fig, (ax1, ax2) = plt.subplots(1, 2)
+_, imatges, _ = llegir_dades()
+imatges = imatges.reshape(-1, 28, 28)
+ax1.imshow(imatges[0], cmap="Greys_r")
+nucli = np.array([[1, 0, -1],
+                 [2, 0, -2],
+                 [1, 0, -1]])
+convolucionat = convolve2d(imatges[0], nucli)
+ax2.imshow(convolucionat, cmap="Greys_r")
+plt.savefig(camí("Figura_exemple_conv.svg"), bbox_inches='tight')
 
 
 # Generar 100 mostres entre -2 i 2
