@@ -1,4 +1,5 @@
 import ia
+import pintar
 from model import xarxa
 import threading
 import numpy as np
@@ -147,34 +148,6 @@ class ProvarPantalla(Screen):
         self.prediccio = f"Predicció: {np.argmax(sortida, 0)[0]} | Confiança: {np.max(sortida, 0)[0]*100:.2f}%"
         print(str(np.argmax(sortida, 0)))
         print(str(np.max(sortida, 0)))
-
-
-class Pintar(Widget):
-    def __init__(self, **kwargs):
-        super(Pintar, self).__init__(**kwargs)
-
-    ellipses = []
-    lines = []
-
-    def on_touch_down(self, touch):
-        with self.canvas:
-            if self.collide_point(*touch.pos):
-                Color(0, 0, 0)
-                d = 20
-                self.ellipses.append(
-                    Ellipse(pos=(touch.x - d / 2, touch.y - d / 2), size=(d, d)))
-                touch.ud['line'] = Line(points=(touch.x, touch.y), width=d / 2)
-                self.lines.append(touch.ud['line'])
-
-    def on_touch_move(self, touch):
-        if self.collide_point(*touch.pos):
-            touch.ud['line'].points += [touch.x, touch.y]
-        else:
-            with self.canvas:
-                Color(0, 0, 0)
-                d = 20
-                touch.ud['line'] = Line(points=(touch.x, touch.y), width=d / 2)
-                self.lines.append(touch.ud['line'])
 
 
 class MenuPantalla(Screen):
