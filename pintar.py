@@ -1,12 +1,20 @@
 from kivy.uix.widget import Widget
 from kivy.graphics import Color, Rectangle
 from kivy.graphics import Color, Ellipse, Line
+from kivy.properties import ColorProperty
 
 class Pintar(Widget):
+    background_color = ColorProperty((1., 1., 1., 1.))
     def __init__(self, **kwargs):
         super(Pintar, self).__init__(**kwargs)
         with self.canvas.before:
-            Color(1., 1., 1.)
+            self.background_color
+            Rectangle(size=self.size)
+    
+    def on_background_color(self, instance, value):
+        print(self.background_color)
+        with self.canvas.before:
+            Color(rgba=self.background_color)
             Rectangle(size=self.size)
 
     ellipses = []
