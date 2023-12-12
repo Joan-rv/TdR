@@ -74,6 +74,11 @@ MenuPantalla:
             pos_hint: { "center_x": 0.5 }
             Pintar:
                 id: canvas_pintar
+                canvas.before:
+                    Color:
+                        rgba: 1, 1, 1, 1
+                    Rectangle:
+                        size: self.size
         Label:
             text: root.prediccio
             font_size: "30sp"

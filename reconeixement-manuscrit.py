@@ -1,5 +1,4 @@
 import ia
-import pintar
 from model import xarxa
 import threading
 import numpy as np
@@ -152,9 +151,6 @@ class ProvarPantalla(Screen):
 class Pintar(Widget):
     def __init__(self, **kwargs):
         super(Pintar, self).__init__(**kwargs)
-        with self.canvas.before:
-            Color(1., 1., 1., 1.)
-            Rectangle(size=self.size)
     
 
     ellipses = []
