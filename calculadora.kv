@@ -8,7 +8,7 @@ BoxLayout:
         orientation: "horizontal"
         RelativeLayout:
             size_hint: None, None
-            size: "1140dp", "190dp"
+            size: "1190dp", "190dp"
             pos_hint: { "center_y": 0.5 }
             Pintar:
                 id: canvas_pintar
@@ -21,24 +21,25 @@ BoxLayout:
                         rgba: 0, 0, 0, .5
                     Rectangle:
                         size: dp(10), dp(190)
-                        pos: 185 + 0*190, 0 
+                        pos: 190 + 0*200, 0 
                     Rectangle:
                         size: dp(10), dp(190)
-                        pos: 185 + 1*190, 0 
+                        pos: 190 + 1*200, 0 
                     Rectangle:
                         size: dp(10), dp(190)
-                        pos: 185 + 2*190, 0 
+                        pos: 190 + 2*200, 0 
                     Rectangle:
                         size: dp(10), dp(190)
-                        pos: 185 + 3*190, 0 
+                        pos: 190 + 3*200, 0 
                     Rectangle:
                         size: dp(10), dp(190)
-                        pos: 185 + 4*190, 0 
+                        pos: 190 + 4*200, 0 
         BoxLayout:
             size_hint: 0.2, 1
             orientation: "vertical"
             Button:
                 text: "+"
+                on_press: app.addition()
             Button:
                 text: "-"
             Button:

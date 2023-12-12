@@ -1,3 +1,9 @@
+from model import xarxa
+
+import pickle
+from PIL import Image, ImageOps
+import numpy as np
+
 from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.graphics import Color, Rectangle
@@ -51,8 +57,51 @@ class CalculadoraApp(App):
     def build(self):
         pass
 
+    def addition(self):
+        self.prediu()
+
+    def prediu(self):
+        global xarxa
+        textura = self.root.ids.canvas_pintar.export_as_image().texture
+        # textura = self.ids.canvas_pintar.texture
+        tamany = textura.size
+        canvas = textura.pixels
+        imatge = Image.frombytes(mode='RGBA', size=tamany, data=canvas)
+        imatges = []
+        np_imatges = np.array(imatge)
+        for n in range(0, 1200, 200):
+            np_imatge = np_imatges[:, n:(n+190), :]
+            if np.all(np_imatge == 255):
+                continue
+            imatges.append(Image.fromarray(np_imatge))
+        np_imatges = []
+        for imatge in imatges:
+            imatge = imatge.convert('L')
+            imatge = ImageOps.invert(imatge)
+            imatge = imatge.crop(imatge.getbbox())
+            amplada, altura = imatge.size
+            nou_tamany = np.maximum(amplada, altura)
+            imatge_nova = Image.new(imatge.mode, (nou_tamany, nou_tamany), (0))
+            imatge_nova.paste(imatge, box=(
+                (nou_tamany - amplada)//2, (nou_tamany - altura)//2))
+            imatge = imatge_nova.resize((20, 20))
+            imatge = np.array(imatge)
+            imatge = imatge / 255.0
+            imatge = np.pad(imatge, 4)
+            imatge = imatge.reshape(1, 28, 28, 1)
+            np_imatges.append(imatge)
+
+        num = ""
+        for imatge in np_imatges:
+            sortida = xarxa.propaga(imatge)
+            num += str(np.argmax(sortida, 0)[0])
+        print(num)
+
 
 def main():
+    global xarxa
+    with open(f"algorisme{xarxa}.pkl", 'rb') as fitxer:
+        xarxa, _ = pickle.load(fitxer)
     CalculadoraApp().run()
 
 
