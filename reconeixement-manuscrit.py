@@ -148,10 +148,10 @@ class ProvarPantalla(Screen):
         print(str(np.argmax(sortida, 0)))
         print(str(np.max(sortida, 0)))
 
+
 class Pintar(Widget):
     def __init__(self, **kwargs):
         super(Pintar, self).__init__(**kwargs)
-    
 
     ellipses = []
     lines = []
@@ -175,6 +175,7 @@ class Pintar(Widget):
                 d = 20
                 touch.ud['line'] = Line(points=(touch.x, touch.y), width=d / 2)
                 self.lines.append(touch.ud['line'])
+
 
 class MenuPantalla(Screen):
     pass
