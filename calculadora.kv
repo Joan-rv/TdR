@@ -1,3 +1,4 @@
+#:kivy 2.2
 BoxLayout:
     orientation: "vertical"
     Label:
@@ -6,43 +7,54 @@ BoxLayout:
         font_size: "30sp"
     BoxLayout:
         orientation: "horizontal"
-        RelativeLayout:
-            size_hint: None, None
-            size: "1190dp", "190dp"
-            pos_hint: { "center_y": 0.5 }
-            Pintar:
-                id: canvas_pintar
-                canvas.before:
-                    Color:
-                        rgba: 1, 1, 1, 1
-                    Rectangle:
-                        size: self.size
-                    Color:
-                        rgba: 0, 0, 0, .5
-                    Rectangle:
-                        size: dp(10), dp(190)
-                        pos: 190 + 0*200, 0 
-                    Rectangle:
-                        size: dp(10), dp(190)
-                        pos: 190 + 1*200, 0 
-                    Rectangle:
-                        size: dp(10), dp(190)
-                        pos: 190 + 2*200, 0 
-                    Rectangle:
-                        size: dp(10), dp(190)
-                        pos: 190 + 3*200, 0 
-                    Rectangle:
-                        size: dp(10), dp(190)
-                        pos: 190 + 4*200, 0 
         BoxLayout:
-            size_hint: 0.2, 1
+            orientation: "vertical"
+            RelativeLayout:
+                size_hint: None, None
+                size: "1190dp", "190dp"
+                pos_hint: { "center_y": 0.5 }
+                Pintar:
+                    id: canvas_pintar
+                    canvas.before:
+                        Color:
+                            rgba: 1, 1, 1, 1
+                        Rectangle:
+                            size: self.size
+                        Color:
+                            rgba: 0, 0, 0, .5
+                        Rectangle:
+                            size: dp(10), dp(190)
+                            pos: 190 + 0*200, 0 
+                        Rectangle:
+                            size: dp(10), dp(190)
+                            pos: 190 + 1*200, 0 
+                        Rectangle:
+                            size: dp(10), dp(190)
+                            pos: 190 + 2*200, 0 
+                        Rectangle:
+                            size: dp(10), dp(190)
+                            pos: 190 + 3*200, 0 
+                        Rectangle:
+                            size: dp(10), dp(190)
+                            pos: 190 + 4*200, 0 
+            Label:
+                text: app.text
+                font_size: "30sp"
+        BoxLayout:
+            size_hint: 0.1, 1
             orientation: "vertical"
             Button:
                 text: "+"
-                on_press: app.addition()
+                on_press: app.suma()
             Button:
                 text: "-"
-            Button:
-                text: "/"
+                on_press: app.resta()
             Button:
                 text: "*"
+                on_press: app.multiplica()
+            Button:
+                text: "/"
+                on_press: app.divideix()
+            Button:
+                text: "="
+                on_press: app.igual()

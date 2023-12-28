@@ -8,10 +8,10 @@ from kivy.app import App
 from kivy.uix.widget import Widget
 from kivy.graphics import Color, Rectangle
 from kivy.graphics import Color, Ellipse, Line
-from kivy.properties import ColorProperty
+from kivy.properties import ColorProperty, StringProperty
 
 from kivy.config import Config
-Config.set('graphics', 'width', '1300')
+Config.set('graphics', 'width', '1400')
 
 
 class Pintar(Widget):
@@ -44,7 +44,10 @@ class Pintar(Widget):
 
     def on_touch_move(self, touch):
         if self.collide_point(*touch.pos):
-            touch.ud['line'].points += [touch.x, touch.y]
+            try:
+                touch.ud['line'].points += [touch.x, touch.y]
+            except KeyError:
+                self.on_touch_down(touch)
         else:
             with self.canvas:
                 Color(0, 0, 0)
@@ -54,16 +57,54 @@ class Pintar(Widget):
 
 
 class CalculadoraApp(App):
+    num = None
+    ultima_op = None
+    text = StringProperty("Resultat")
+
     def build(self):
         pass
 
-    def addition(self):
-        self.prediu()
+    def suma(self):
+        self.processa_op(self.prediu())
+        self.ultima_op = "suma"
+
+    def resta(self):
+        self.processa_op(self.prediu())
+        self.ultima_op = "resta"
+
+    def multiplica(self):
+        self.processa_op(self.prediu())
+        self.ultima_op = "multiplica"
+
+    def divideix(self):
+        self.processa_op(self.prediu())
+        self.ultima_op = "divideix"
+
+    def igual(self):
+        self.processa_op(self.prediu())
+        self.text = f"{self.num}"
+        self.ultima_op = "igual"
+
+    def processa_op(self, num):
+        if num == None:
+            return
+        if self.ultima_op == None:
+            self.num = num
+        elif self.ultima_op == "igual":
+            self.num = num
+        elif self.ultima_op == "suma":
+            self.num += num
+        elif self.ultima_op == "resta":
+            self.num -= num
+        elif self.ultima_op == "multiplica":
+            self.num *= num
+        elif self.ultima_op == "divideix":
+            self.num /= num
+        self.text = f"{self.num}"
 
     def prediu(self):
         global xarxa
         textura = self.root.ids.canvas_pintar.export_as_image().texture
-        # textura = self.ids.canvas_pintar.texture
         tamany = textura.size
         canvas = textura.pixels
         imatge = Image.frombytes(mode='RGBA', size=tamany, data=canvas)
@@ -95,7 +136,11 @@ class CalculadoraApp(App):
         for imatge in np_imatges:
             sortida = xarxa.propaga(imatge)
             num += str(np.argmax(sortida, 0)[0])
+        self.root.ids.canvas_pintar.canvas.clear()
+        if num == "":
+            return None
         print(num)
+        return int(num)
 
 
 def main():
