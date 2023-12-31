@@ -64,41 +64,51 @@ class CalculadoraApp(App):
     def build(self):
         pass
 
+    def ac(self):
+        self.root.ids.canvas_pintar.canvas.clear()
+        self.num = None
+        self.ultima_op = None
+        self.text = "Resultat"
+
+    def delete(self):
+        self.root.ids.canvas_pintar.canvas.clear()
+
     def suma(self):
         self.processa_op(self.prediu())
-        self.ultima_op = "suma"
+        self.ultima_op = "+"
 
     def resta(self):
         self.processa_op(self.prediu())
-        self.ultima_op = "resta"
+        self.ultima_op = "-"
 
     def multiplica(self):
         self.processa_op(self.prediu())
-        self.ultima_op = "multiplica"
+        self.ultima_op = "*"
 
     def divideix(self):
         self.processa_op(self.prediu())
-        self.ultima_op = "divideix"
+        self.ultima_op = "/"
 
     def igual(self):
         self.processa_op(self.prediu())
         self.text = f"{self.num}"
-        self.ultima_op = "igual"
+        self.ultima_op = "="
 
     def processa_op(self, num):
+        self.root.ids.canvas_pintar.canvas.clear()
         if num == None:
             return
         if self.ultima_op == None:
             self.num = num
-        elif self.ultima_op == "igual":
+        elif self.ultima_op == "=":
             self.num = num
-        elif self.ultima_op == "suma":
+        elif self.ultima_op == "+":
             self.num += num
-        elif self.ultima_op == "resta":
+        elif self.ultima_op == "-":
             self.num -= num
-        elif self.ultima_op == "multiplica":
+        elif self.ultima_op == "*":
             self.num *= num
-        elif self.ultima_op == "divideix":
+        elif self.ultima_op == "/":
             self.num /= num
         self.text = f"{self.num}"
 
@@ -136,11 +146,19 @@ class CalculadoraApp(App):
         for imatge in np_imatges:
             sortida = xarxa.propaga(imatge)
             num += str(np.argmax(sortida, 0)[0])
-        self.root.ids.canvas_pintar.canvas.clear()
         if num == "":
             return None
         print(num)
         return int(num)
+
+    def imprimeix(self):
+        num = self.prediu()
+        if self.ultima_op == None:
+            self.text = f"{num}"
+        elif self.ultima_op == "=":
+            self.text = f"{self.num}"
+        else:
+            self.text = f"{self.num} {self.ultima_op} {num}"
 
 
 def main():

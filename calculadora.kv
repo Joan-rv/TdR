@@ -15,6 +15,7 @@ BoxLayout:
                 pos_hint: { "center_y": 0.5 }
                 Pintar:
                     id: canvas_pintar
+                    on_touch_up: app.imprimeix()
                     canvas.before:
                         Color:
                             rgba: 1, 1, 1, 1
@@ -43,6 +44,12 @@ BoxLayout:
         BoxLayout:
             size_hint: 0.1, 1
             orientation: "vertical"
+            Button:
+                text: "AC"
+                on_press: app.ac()
+            Button:
+                text: "DEL"
+                on_press: app.delete()
             Button:
                 text: "+"
                 on_press: app.suma()
