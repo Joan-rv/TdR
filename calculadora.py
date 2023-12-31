@@ -57,60 +57,43 @@ class Pintar(Widget):
 
 
 class CalculadoraApp(App):
-    num = None
-    ultima_op = None
+    tokens = []
     text = StringProperty("Resultat")
 
     def build(self):
         pass
 
     def ac(self):
-        self.root.ids.canvas_pintar.canvas.clear()
-        self.num = None
-        self.ultima_op = None
-        self.text = "Resultat"
+        self.tokens = []
 
     def delete(self):
-        self.root.ids.canvas_pintar.canvas.clear()
+        if len(self.tokens) != 0:
+            self.root.ids.canvas_pintar.canvas.clear()
+            self.tokens.pop()
 
     def suma(self):
-        self.processa_op(self.prediu())
-        self.ultima_op = "+"
+        self.tokens.append("+")
+        self.processa_op()
 
     def resta(self):
-        self.processa_op(self.prediu())
-        self.ultima_op = "-"
+        self.tokens.append("-")
+        self.processa_op()
 
     def multiplica(self):
-        self.processa_op(self.prediu())
-        self.ultima_op = "*"
+        self.tokens.append("*")
+        self.processa_op()
 
     def divideix(self):
-        self.processa_op(self.prediu())
-        self.ultima_op = "/"
+        self.tokens.append("/")
+        self.processa_op()
 
     def igual(self):
-        self.processa_op(self.prediu())
-        self.text = f"{self.num}"
-        self.ultima_op = "="
+        resultat = eval(''.join(self.tokens))
+        self.tokens = [str(resultat)]
+        self.processa_op()
 
-    def processa_op(self, num):
+    def processa_op(self):
         self.root.ids.canvas_pintar.canvas.clear()
-        if num == None:
-            return
-        if self.ultima_op == None:
-            self.num = num
-        elif self.ultima_op == "=":
-            self.num = num
-        elif self.ultima_op == "+":
-            self.num += num
-        elif self.ultima_op == "-":
-            self.num -= num
-        elif self.ultima_op == "*":
-            self.num *= num
-        elif self.ultima_op == "/":
-            self.num /= num
-        self.text = f"{self.num}"
 
     def prediu(self):
         global xarxa
@@ -148,17 +131,18 @@ class CalculadoraApp(App):
             num += str(np.argmax(sortida, 0)[0])
         if num == "":
             return None
-        print(num)
-        return int(num)
+        return num
 
     def imprimeix(self):
-        num = self.prediu()
-        if self.ultima_op == None:
-            self.text = f"{num}"
-        elif self.ultima_op == "=":
-            self.text = f"{self.num}"
+        if self.prediu() == None:
+            pass
+        elif len(self.tokens) == 0:
+            self.tokens.append(self.prediu())
+        elif self.tokens[-1].isdigit():
+            self.tokens[-1] = self.prediu()
         else:
-            self.text = f"{self.num} {self.ultima_op} {num}"
+            self.tokens.append(self.prediu())
+        self.text = " ".join(self.tokens)
 
 
 def main():
