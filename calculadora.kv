@@ -5,44 +5,42 @@ BoxLayout:
         size_hint: 1, 0.1
         text: "Calculadora amb IA"
         font_size: "30sp"
+    RelativeLayout:
+        size_hint: None, None
+        size: "1190dp", "190dp"
+        pos_hint: { "center_x": 0.5 }
+        Pintar:
+            id: canvas_pintar
+            on_touch_up: app.imprimeix()
+            canvas.before:
+                Color:
+                    rgba: 1, 1, 1, 1
+                Rectangle:
+                    size: self.size
+                Color:
+                    rgba: 0, 0, 0, .5
+                Rectangle:
+                    size: dp(10), dp(190)
+                    pos: 190 + 0*200, 0 
+                Rectangle:
+                    size: dp(10), dp(190)
+                    pos: 190 + 1*200, 0 
+                Rectangle:
+                    size: dp(10), dp(190)
+                    pos: 190 + 2*200, 0 
+                Rectangle:
+                    size: dp(10), dp(190)
+                    pos: 190 + 3*200, 0 
+                Rectangle:
+                    size: dp(10), dp(190)
+                    pos: 190 + 4*200, 0 
     BoxLayout:
         orientation: "horizontal"
+        Label:
+            text: app.text
+            font_size: "30sp"
         BoxLayout:
-            orientation: "vertical"
-            RelativeLayout:
-                size_hint: None, None
-                size: "1190dp", "190dp"
-                pos_hint: { "center_y": 0.5 }
-                Pintar:
-                    id: canvas_pintar
-                    on_touch_up: app.imprimeix()
-                    canvas.before:
-                        Color:
-                            rgba: 1, 1, 1, 1
-                        Rectangle:
-                            size: self.size
-                        Color:
-                            rgba: 0, 0, 0, .5
-                        Rectangle:
-                            size: dp(10), dp(190)
-                            pos: 190 + 0*200, 0 
-                        Rectangle:
-                            size: dp(10), dp(190)
-                            pos: 190 + 1*200, 0 
-                        Rectangle:
-                            size: dp(10), dp(190)
-                            pos: 190 + 2*200, 0 
-                        Rectangle:
-                            size: dp(10), dp(190)
-                            pos: 190 + 3*200, 0 
-                        Rectangle:
-                            size: dp(10), dp(190)
-                            pos: 190 + 4*200, 0 
-            Label:
-                text: app.text
-                font_size: "30sp"
-        BoxLayout:
-            size_hint: 0.1, 1
+            #size_hint: 0.1, 1
             orientation: "vertical"
             Button:
                 text: "AC"
