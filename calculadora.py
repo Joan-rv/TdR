@@ -65,6 +65,7 @@ class CalculadoraApp(App):
 
     def ac(self):
         self.tokens = []
+        self.root.ids.canvas_pintar.canvas.clear()
 
     def delete(self):
         if len(self.tokens) != 0:
@@ -88,9 +89,14 @@ class CalculadoraApp(App):
         self.processa_op()
 
     def igual(self):
-        resultat = eval(''.join(self.tokens))
-        self.tokens = [str(resultat)]
-        self.processa_op()
+        try:
+            resultat = eval(''.join(self.tokens))
+            self.tokens = [str(resultat)]
+            self.processa_op()
+        except SyntaxError:
+            self.text = "Error de sintaxi"
+            self.tokens = []
+            self.root.ids.canvas_pintar.canvas.clear()
 
     def processa_op(self):
         self.root.ids.canvas_pintar.canvas.clear()
