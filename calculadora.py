@@ -140,6 +140,8 @@ class CalculadoraApp(App):
         return num
 
     def imprimeix(self):
+        if self.prediu() == None and len(self.tokens) == 0:
+            return
         if self.prediu() == None:
             pass
         elif len(self.tokens) == 0:
