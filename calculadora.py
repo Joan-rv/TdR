@@ -60,6 +60,7 @@ class Pintar(Widget):
 class CalculadoraApp(App):
     tokens = []
     text = StringProperty("Resultat")
+    error = False
 
     def build(self):
         pass
@@ -130,6 +131,7 @@ class CalculadoraApp(App):
             self.tokens = [str(resultat)]
             self.processa_op()
         except SyntaxError:
+            self.error = True
             self.text = "Error de sintaxi"
             self.tokens = []
             self.root.ids.canvas_pintar.canvas.clear()
@@ -176,7 +178,8 @@ class CalculadoraApp(App):
         return num
 
     def imprimeix(self):
-        if self.prediu() == None and len(self.tokens) == 0:
+        if self.error:
+            self.error = False
             return
         if self.prediu() == None:
             pass
