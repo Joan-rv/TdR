@@ -3,6 +3,7 @@ from model import xarxa
 import pickle
 from PIL import Image, ImageOps
 import numpy as np
+from math import sqrt, sin, cos, tan, pi
 
 from kivy.app import App
 from kivy.uix.widget import Widget
@@ -90,13 +91,47 @@ class CalculadoraApp(App):
 
     def igual(self):
         try:
-            resultat = eval(''.join(self.tokens))
+            text = ''.join(self.tokens)
+            text.replace("^", "**")
+            resultat = eval(text)
             self.tokens = [str(resultat)]
             self.processa_op()
         except SyntaxError:
             self.text = "Error de sintaxi"
             self.tokens = []
             self.root.ids.canvas_pintar.canvas.clear()
+
+    def elevar(self):
+        self.tokens.append("^")
+        self.processa_op()
+
+    def arrel(self):
+        self.tokens.append("sqrt(")
+        self.processa_op()
+
+    def obre_paren(self):
+        self.tokens.append("(")
+        self.processa_op()
+
+    def tanca_paren(self):
+        self.tokens.append(")")
+        self.processa_op()
+
+    def sin(self):
+        self.tokens.append("sin(")
+        self.processa_op()
+
+    def cos(self):
+        self.tokens.append("cos(")
+        self.processa_op()
+
+    def tan(self):
+        self.tokens.append("tan(")
+        self.processa_op()
+
+    def pi(self):
+        self.tokens.append("pi")
+        self.processa_op()
 
     def processa_op(self):
         self.root.ids.canvas_pintar.canvas.clear()
@@ -150,7 +185,7 @@ class CalculadoraApp(App):
             self.tokens[-1] = self.prediu()
         else:
             self.tokens.append(self.prediu())
-        self.text = " ".join(self.tokens)
+        self.text = "".join(self.tokens)
 
 
 def main():
