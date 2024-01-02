@@ -124,7 +124,8 @@ class CalculadoraApp(App):
     def igual(self):
         try:
             text = ''.join(self.tokens)
-            text.replace("^", "**")
+            text = text.replace("^", "**")
+            print(text)
             resultat = eval(text)
             self.tokens = [str(resultat)]
             self.processa_op()
