@@ -89,18 +89,6 @@ class CalculadoraApp(App):
         self.tokens.append("/")
         self.processa_op()
 
-    def igual(self):
-        try:
-            text = ''.join(self.tokens)
-            text.replace("^", "**")
-            resultat = eval(text)
-            self.tokens = [str(resultat)]
-            self.processa_op()
-        except SyntaxError:
-            self.text = "Error de sintaxi"
-            self.tokens = []
-            self.root.ids.canvas_pintar.canvas.clear()
-
     def elevar(self):
         self.tokens.append("^")
         self.processa_op()
@@ -132,6 +120,18 @@ class CalculadoraApp(App):
     def pi(self):
         self.tokens.append("pi")
         self.processa_op()
+
+    def igual(self):
+        try:
+            text = ''.join(self.tokens)
+            text.replace("^", "**")
+            resultat = eval(text)
+            self.tokens = [str(resultat)]
+            self.processa_op()
+        except SyntaxError:
+            self.text = "Error de sintaxi"
+            self.tokens = []
+            self.root.ids.canvas_pintar.canvas.clear()
 
     def processa_op(self):
         self.root.ids.canvas_pintar.canvas.clear()

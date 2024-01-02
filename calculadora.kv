@@ -39,9 +39,9 @@ BoxLayout:
         Label:
             text: app.text
             font_size: "30sp"
-        BoxLayout:
+        GridLayout:
             #size_hint: 0.1, 1
-            orientation: "vertical"
+            rows: 7
             Button:
                 text: "AC"
                 on_press: app.ac()
@@ -60,9 +60,6 @@ BoxLayout:
             Button:
                 text: "/"
                 on_press: app.divideix()
-            Button:
-                text: "="
-                on_press: app.igual()
             Button:
                 text: "^"
                 on_press: app.elevar()
@@ -87,3 +84,6 @@ BoxLayout:
             Button:
                 text: "pi"
                 on_press: app.pi()
+            Button:
+                text: "="
+                on_press: app.igual()
