@@ -126,7 +126,6 @@ class CalculadoraApp(App):
         try:
             text = ''.join(self.tokens)
             text = text.replace("^", "**")
-            print(text)
             resultat = eval(text)
             self.tokens = [str(resultat)]
             self.processa_op()
